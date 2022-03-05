@@ -1,0 +1,59 @@
+    public $criteria_type and${property_upper}IsNull() {
+        addCriterion("$column is null");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}NotNull() {
+        addCriterion("$column is not null");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}Eq($type value) {
+        addCriterion("$column =", value, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}Ne($type value) {
+        addCriterion("$column <>", value, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}Gt($type value) {
+        addCriterion("$column >", value, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}Ge($type value) {
+        addCriterion("$column >=", value, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}Lt($type value) {
+        addCriterion("$column <", value, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}Le($type value) {
+        addCriterion("$column <=", value, "$property");
+        return this;
+    }
+$criteria_method_str
+    public $criteria_type and${property_upper}In(List<$type> values) {
+        addCriterion("$column in", values, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}NotIn(List<$type> values) {
+        addCriterion("$column not in", values, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}Between($type firstValue, $type secondValue) {
+        addCriterion("$column between", firstValue, secondValue, "$property");
+        return this;
+    }
+
+    public $criteria_type and${property_upper}NotBetween($type firstValue, $type secondValue) {
+        addCriterion("$column not between", firstValue, secondValue, "$property");
+        return this;
+    }
