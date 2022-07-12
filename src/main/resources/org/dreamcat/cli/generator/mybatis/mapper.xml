@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="$namespace">
+<mapper namespace="$mapper_package.$mapper_name">
 
   <resultMap id="BaseResultMap" type="$result_map">
-    <!--
-    <id column="$column" jdbcType="$type" property="$property" />
-    -->
-    $result_map_id_list
-    <!--
-    <result column="$column" jdbcType="$type" property="$property" />
-    -->
-    $result_map_result_list
+$result_map_id_list
+$result_map_result_list
   </resultMap>
 
   <sql id="table_name">
@@ -18,7 +12,6 @@
   </sql>
 
   <sql id="base_column_list">
-    <!-- id,created_at,updated_at -->
     $select_column_list
   </sql>
 
@@ -30,16 +23,16 @@
             <foreach collection="criteria.criteria" item="criterion">
               <choose>
                 <when test="criterion.noValue">
-                  and \${criterion.condition}
+                  and ${criterion.condition}
                 </when>
                 <when test="criterion.singleValue">
-                  and \${criterion.condition} #{criterion.value}
+                  and ${criterion.condition} #{criterion.value}
                 </when>
                 <when test="criterion.betweenValue">
-                  and \${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
                 </when>
                 <when test="criterion.listValue">
-                  and \${criterion.condition}
+                  and ${criterion.condition}
                   <foreach open="(" close=")" collection="criterion.value" item="listItem" separator=",">
                     #{listItem}
                   </foreach>
@@ -60,16 +53,16 @@
             <foreach collection="criteria.criteria" item="criterion">
               <choose>
                 <when test="criterion.noValue">
-                  and \${criterion.condition}
+                  and ${criterion.condition}
                 </when>
                 <when test="criterion.singleValue">
-                  and \${criterion.condition} #{criterion.value}
+                  and ${criterion.condition} #{criterion.value}
                 </when>
                 <when test="criterion.betweenValue">
-                  and \${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
                 </when>
                 <when test="criterion.listValue">
-                  and \${criterion.condition}
+                  and ${criterion.condition}
                   <foreach open="(" close=")" collection="criterion.value" item="listItem" separator=",">
                     #{listItem}
                   </foreach>
@@ -86,9 +79,6 @@
     insert into
     <include refid="table_name"/>
     ($insert_column_list)
-    <!--
-    #{item.$property,jdbcType=$type},
-     -->
     values ($insert_column_value_list)
   </insert>
 
@@ -96,20 +86,10 @@
     insert into
     <include refid="table_name"/>
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <!--
-      <if test="$property != null">
-          $column,
-      </if>
-      -->
-      $if_test_column_list
+$if_test_column_list
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <!--
-      <if test="$property != null">
-          #{$property,jdbcType=$type},
-      </if>
-      -->
-      $if_test_column_value_list
+$if_test_column_value_list
     </trim>
   </insert>
 
@@ -123,7 +103,7 @@
     <foreach collection="list" index="index" item="item" separator=",">
       (
       <trim suffixOverrides=",">
-        $insert_column_value_list
+        $batch_insert_column_value_list
       </trim>
       )
     </foreach>
@@ -132,11 +112,10 @@
   <delete id="delete">
     delete from
     <include refid="table_name"/>
-    <!-- $column = #{$property,jdbcType=$type} and -->
     where $primary_key_eq_list
   </delete>
 
-  <delete id="deleteWhere">
+  <delete id="deleteBy">
     delete from
     <include refid="table_name"/>
     <if test="_parameter != null">
@@ -152,11 +131,10 @@
     <include refid="base_column_list"/>
     from
     <include refid="table_name"/>
-    <!-- $column = #{$property,jdbcType=$type} and -->
     where $primary_key_eq_list
   </select>
 
-  <select id="selectWhere" resultMap="BaseResultMap">
+  <select id="selectBy" resultMap="BaseResultMap">
     select
     <include refid="base_column_list"/>
     from
@@ -172,7 +150,7 @@
     </if>
   </select>
 
-  <select id="countWhere" resultType="java.lang.Long">
+  <select id="countBy" resultType="java.lang.Long">
     select count(*) from
     <include refid="table_name"/>
     <if test="_parameter != null">
@@ -183,9 +161,7 @@
   <update id="update" parameterType="$result_map">
     update
     <include refid="table_name"/>
-    <!-- $column = #{$property,jdbcType=$type}, -->
     set $update_column_value_list
-    <!-- $column = #{$property,jdbcType=$type} and -->
     where $primary_key_eq_list
   </update>
 
@@ -193,37 +169,26 @@
     update
     <include refid="table_name"/>
     <set>
-      <!--
-      <if test="entity.$property != null">
-          id = #{entity.$property,jdbcType=$type},
-      </if>
-      -->
-      $update_if_test_column_value_list
+$update_if_test_column_value_list
     </set>
-    <!-- $column = #{$property,jdbcType=$type} and -->
     where $primary_key_eq_list
   </update>
 
-  <update id="updateWhere">
+  <update id="updateBy">
     update
     <include refid="table_name"/>
-    <!-- $column = #{$property,jdbcType=$type}, -->
-    set $update_column_value_list
+    set
+      $update_by_column_value_list
     <if test="condition != null">
       <include refid="update_where_criteria"/>
     </if>
   </update>
 
-  <update id="updateSelectiveWhere">
+  <update id="updateSelectiveBy">
     update
     <include refid="table_name"/>
     <set>
-      <!--
-      <if test="entity.$property != null">
-          id = #{entity.$property,jdbcType=$type},
-      </if>
-      -->
-      $update_if_test_column_value_list
+$update_by_if_test_column_value_list
     </set>
     <if test="condition != null">
       <include refid="update_where_criteria"/>

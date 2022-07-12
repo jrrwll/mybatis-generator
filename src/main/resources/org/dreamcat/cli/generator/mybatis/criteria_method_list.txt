@@ -1,0 +1,9 @@
+        public Criteria and${property_capital}In$suffix(List<$type> values) {
+            addCriterion("$column in", values, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}NotIn$suffix(List<$type> values) {
+            addCriterion("$column not in", values, "$property");
+            return this;
+        }

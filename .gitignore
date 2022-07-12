@@ -11,3 +11,5 @@ build
 .DS_Store
 generated
 generated_tests
+src/test/java/com/example/entity/
+src/test/java/com/example/mapper/

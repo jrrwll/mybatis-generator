@@ -1,0 +1,9 @@
+        public Criteria and${property_capital}Like(String value) {
+            addCriterion("$column like", value, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}NotLike(String value) {
+            addCriterion("$column not like", value, "$property");
+            return this;
+        }

@@ -1,0 +1,39 @@
+        public Criteria and${property_capital}Eq($type value) {
+            addCriterion("$column =", value, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}Ne($type value) {
+            addCriterion("$column <>", value, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}Gt($type value) {
+            addCriterion("$column >", value, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}Ge($type value) {
+            addCriterion("$column >=", value, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}Lt($type value) {
+            addCriterion("$column <", value, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}Le($type value) {
+            addCriterion("$column <=", value, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}Between($type firstValue, $type secondValue) {
+            addCriterion("$column between", firstValue, secondValue, "$property");
+            return this;
+        }
+
+        public Criteria and${property_capital}NotBetween($type firstValue, $type secondValue) {
+            addCriterion("$column not between", firstValue, secondValue, "$property");
+            return this;
+        }

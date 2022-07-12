@@ -33,9 +33,13 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
-    implementation 'org.dreamcat:common-core:0.1-SNAPSHOT'
-    implementation 'org.dreamcat:common-x:0.1-SNAPSHOT'
+    implementation 'org.dreamcat:common-core:0.3'
+    implementation 'org.dreamcat:common-x:0.3'
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+
+    testImplementation 'org.mybatis:mybatis:3.5.10'
+    // testRuntimeOnly 'mysql:mysql-connector-java:8.0.29'
+    testRuntimeOnly 'com.h2database:h2:2.1.214'
 }
 
 apply from: "./publish.gradle"
@@ -48,4 +52,10 @@ task printVersion {
 
 test {
     useJUnitPlatform()
+}
+
+processTestResources {
+    from('src/test/java') {
+        include '**/*.xml'
+    }
 }

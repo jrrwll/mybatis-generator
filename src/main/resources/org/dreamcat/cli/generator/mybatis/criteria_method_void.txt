@@ -1,0 +1,9 @@
+        public Criteria and${property_capital}IsNull() {
+            addCriterion("$column is null");
+            return this;
+        }
+
+        public Criteria and${property_capital}NotNull() {
+            addCriterion("$column is not null");
+            return this;
+        }

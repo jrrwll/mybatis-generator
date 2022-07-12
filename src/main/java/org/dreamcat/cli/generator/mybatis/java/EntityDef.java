@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
 import org.dreamcat.cli.generator.mybatis.sql.ColumnDef;
 import org.dreamcat.cli.generator.mybatis.sql.TableDef;
@@ -21,19 +20,28 @@ import org.dreamcat.cli.generator.mybatis.sql.TableDef;
 public class EntityDef {
 
     private String tableName;
-    private Map<String, Column> columns;
-    private List<Column> primaryKeyColumns;
-    private List<Column> notPrimaryKeyColumns;
+    private Map<String, EntityColumnDef> columns;
+    private List<EntityColumnDef> primaryKeyColumns;
+    private List<EntityColumnDef> notPrimaryKeyColumns;
+
     // extents
-    private String mapperClass;
-    private String entityClass;
-    private Map<String, Column> selectColumns;
-    private Map<String, Column> insertColumns;
+    private String entityName;
+    private String mapperName;
+    private String conditionName;
+
+    private Map<String, EntityColumnDef> selectColumns = new HashMap<>();
+    private Map<String, EntityColumnDef> insertColumns = new HashMap<>();
 
     public EntityDef(TableDef table, MyBatisGeneratorConfig config) {
+        this.tableName = table.getName();
+
+        this.entityName = config.getEntityNameConfig().format(tableName);
+        this.mapperName = config.getMapperNameConfig().format(tableName);
+        this.conditionName = config.getConditionNameConfig().format(tableName);
+
         this.columns = new HashMap<>();
         for (ColumnDef column : table.getColumns()) {
-            this.columns.put(column.getName(), new Column(column));
+            this.columns.put(column.getName(), new EntityColumnDef(column, config));
         }
 
         this.primaryKeyColumns = table.getPrimaryKey().getColumns().stream()
@@ -43,25 +51,15 @@ public class EntityDef {
         Set<String> pkColumns = new HashSet<>(table.getPrimaryKey().getColumns());
         this.notPrimaryKeyColumns = new ArrayList<>(columns.size() - pkColumns.size());
         columns.forEach((name, column) -> {
-            if (pkColumns.contains(name)) {
-                return;
+            if (!pkColumns.contains(name)) {
+                this.notPrimaryKeyColumns.add(column);
             }
-
-            this.notPrimaryKeyColumns.add(column);
+            if (!config.getIgnoreSelectColumns().contains(name)) {
+                selectColumns.put(name, column);
+            }
+            if (!config.getIgnoreInsertColumns().contains(name)) {
+                insertColumns.put(name, column);
+            }
         });
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class Column {
-
-        // wrapped
-        private ColumnDef column;
-        // extents
-        private String property;
-
-        public Column(ColumnDef column) {
-
-        }
     }
 }

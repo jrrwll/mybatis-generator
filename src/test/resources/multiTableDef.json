@@ -1,0 +1,44 @@
+{
+  "name": "live_room",
+  "comment": "a live room record",
+  "columns": [
+    {
+      "name": "tenant_id",
+      "type": "varchar",
+      "notNull": true,
+      "comment": "tenant id"
+    },
+    {
+      "name": "seq_id",
+      "type": "bigint",
+      "notNull": true,
+      "comment": "seq id"
+    },
+    {
+      "name": "room_id",
+      "type": "varchar",
+      "notNull": true,
+      "comment": "room id"
+    },
+    {
+      "name": "record_date",
+      "type": "date",
+      "notNull": true,
+      "comment": "record time"
+    },
+    {
+      "name": "created_at",
+      "type": "datetime",
+      "notNull": false,
+      "comment": "create time"
+    }
+  ],
+  "primaryKey": {
+    "name": "PK",
+    "columns": [
+      "tenant_id",
+      "seq_id",
+      "record_date"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "way_bill",
+  "comment": "a waybill",
+  "columns": [
+    {
+      "name": "customer_id",
+      "type": "bigint",
+      "notNull": true,
+      "comment": "customer id"
+    },
+    {
+      "name": "shop_id",
+      "type": "varchar",
+      "notNull": false,
+      "comment": "shop id"
+    },
+    {
+      "name": "way_bill_id",
+      "type": "bigint",
+      "notNull": true,
+      "comment": "shop id"
+    },
+    {
+      "name": "created_at",
+      "type": "datetime",
+      "notNull": true,
+      "comment": "create time"
+    }
+  ],
+  "primaryKey": {
+    "name": "PK",
+    "columns": [
+      "way_bill_id"
+    ]
+  }
+}
