@@ -1,15 +1,17 @@
 package com.example;
 
-import static org.dreamcat.common.util.ReflectUtil.*;
-import static org.dreamcat.common.x.bean.BeanCopyUtil.*;
-import static org.dreamcat.common.util.DateUtil.*;
+import static org.dreamcat.common.util.DateUtil.addDay;
+import static org.dreamcat.common.util.DateUtil.formatDate;
+import static org.dreamcat.common.util.ReflectUtil.forName;
+import static org.dreamcat.common.util.ReflectUtil.invoke;
+import static org.dreamcat.common.util.ReflectUtil.newInstance;
+import static org.dreamcat.common.x.bean.BeanCopyUtil.copy;
 
 import com.example.model.LiveRoom;
 import java.io.InputStream;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Consumer;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
@@ -17,7 +19,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.dreamcat.common.io.ClassPathUtil;
 import org.dreamcat.common.util.DateUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -128,7 +129,7 @@ class ExampleTest {
             Object cond2 = newInstance(liveRoomConditionClass);
             System.out.println("countBy after delete:\t" +
                     invoke(mapper, "countBy", cond2));
-            
+
             // deleteBy
             invoke(mapper, "deleteBy", cond1);
             System.out.println("selectBy after deleteBy:\t" +

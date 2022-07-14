@@ -1,8 +1,8 @@
 package org.dreamcat.cli.generator.mybatis.java;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.sql.JDBCType;
+import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;

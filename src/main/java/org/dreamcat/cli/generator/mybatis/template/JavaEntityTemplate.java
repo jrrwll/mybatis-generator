@@ -22,7 +22,7 @@ public class JavaEntityTemplate extends TemplateOutput {
     public String import_lombok = "";
     public String at_lombok = "";
     /**
-     *  $comment
+     * $comment
      */
     // private $type $property;
     public String property_declare_list;

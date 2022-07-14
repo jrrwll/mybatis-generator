@@ -58,6 +58,7 @@ public class MyBatisGeneratorConfig {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class NameConfig {
+
         @Builder.Default
         private String prefix = "";
         @Builder.Default

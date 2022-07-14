@@ -1,7 +1,7 @@
 package $mapper_package;
 
 import $entity_package.$entity_type;
-import java.util.*;$import_mapper
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Param;
  * @version $date
  * @see <a href="https://github.com/jrrwll">Jerry Will's Github</a>
  */$at_mapper
+
 public interface $mapper_type {
 
     int insert($entity_type entity);

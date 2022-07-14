@@ -1,9 +1,6 @@
 package org.dreamcat.cli.generator.mybatis;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.dreamcat.cli.generator.mybatis.sql.ColumnDef;
 import org.dreamcat.cli.generator.mybatis.sql.TableDef;
 import org.dreamcat.common.io.ClassPathUtil;
 import org.dreamcat.common.x.json.JsonUtil;

@@ -3,8 +3,8 @@
 <mapper namespace="$mapper_package.$mapper_name">
 
   <resultMap id="BaseResultMap" type="$result_map">
-$result_map_id_list
-$result_map_result_list
+    $result_map_id_list
+    $result_map_result_list
   </resultMap>
 
   <sql id="table_name">
@@ -86,10 +86,10 @@ $result_map_result_list
     insert into
     <include refid="table_name"/>
     <trim prefix="(" suffix=")" suffixOverrides=",">
-$if_test_column_list
+      $if_test_column_list
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-$if_test_column_value_list
+      $if_test_column_value_list
     </trim>
   </insert>
 
@@ -169,7 +169,7 @@ $if_test_column_value_list
     update
     <include refid="table_name"/>
     <set>
-$update_if_test_column_value_list
+      $update_if_test_column_value_list
     </set>
     where $primary_key_eq_list
   </update>
@@ -178,7 +178,7 @@ $update_if_test_column_value_list
     update
     <include refid="table_name"/>
     set
-      $update_by_column_value_list
+    $update_by_column_value_list
     <if test="condition != null">
       <include refid="update_where_criteria"/>
     </if>
@@ -188,7 +188,7 @@ $update_if_test_column_value_list
     update
     <include refid="table_name"/>
     <set>
-$update_by_if_test_column_value_list
+      $update_by_if_test_column_value_list
     </set>
     <if test="condition != null">
       <include refid="update_where_criteria"/>
