@@ -48,7 +48,7 @@ public class JavaEntityTemplate extends TemplateOutput {
             at_lombok = "\n@Data";
         } else {
             List<String> getSetList = new ArrayList<>();
-            for (EntityColumnDef c : entity.getColumns().values()) {
+            for (EntityColumnDef c : entity.getEntityColumns().values()) {
                 getSetList.add(DollarInterpolation.format(_property_get_set, MapUtil.of(
                         "property", c.getProperty(),
                         "type", c.getJavaSimpleName(),
@@ -64,7 +64,7 @@ public class JavaEntityTemplate extends TemplateOutput {
             propertyDeclareList.add(DollarInterpolation.format(_property_declare, MapUtil.of(
                     "comment", c.getComment(),
                     "type", c.getJavaSimpleName(),
-                    "property", c.getProperty())));
+                    "property", c.getProperty()), ""));
             appendPropertyList.add(DollarInterpolation.format(_append_property, MapUtil.of(
                     "property", c.getProperty())));
 
@@ -81,7 +81,7 @@ public class JavaEntityTemplate extends TemplateOutput {
 
     static final String _all;
     static final String _property_declare = "    /**\n"
-            + "     *  $comment\n"
+            + "     * $comment\n"
             + "     */\n"
             + "    private $type $property;";
     static final String _property_get_set = "    public $type get${property_capital}() {\n"

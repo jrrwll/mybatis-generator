@@ -1,36 +1,52 @@
 {
   "name": "way_bill",
-  "comment": "a waybill",
+  "comment": "a waybill record",
   "columns": [
+    {
+      "name": "way_bill_id",
+      "type": "bigint",
+      "unsigned": false,
+      "notNull": true,
+      "comment": "waybill id",
+      "autoIncrement": false
+    },
     {
       "name": "customer_id",
       "type": "bigint",
+      "unsigned": false,
       "notNull": true,
-      "comment": "customer id"
+      "comment": "customer ID",
+      "autoIncrement": false
     },
     {
       "name": "shop_id",
       "type": "varchar",
+      "unsigned": false,
+      "typeParams": [
+        50
+      ],
       "notNull": false,
-      "comment": "shop id"
-    },
-    {
-      "name": "way_bill_id",
-      "type": "bigint",
-      "notNull": true,
-      "comment": "shop id"
+      "defaultValue": "null",
+      "autoIncrement": false
     },
     {
       "name": "created_at",
       "type": "datetime",
+      "unsigned": false,
       "notNull": true,
-      "comment": "create time"
+      "defaultValue": "current_timestamp",
+      "autoIncrement": false
     }
   ],
+  "orReplace": false,
+  "ifNotExists": false,
   "primaryKey": {
-    "name": "PK",
     "columns": [
       "way_bill_id"
     ]
-  }
+  },
+  "uniqueIndexes": [],
+  "indexes": [],
+  "foreignKeys": [],
+  "rawProperties": "comment = 'a waybill record'"
 }

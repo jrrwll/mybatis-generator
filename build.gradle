@@ -36,6 +36,7 @@ dependencies {
     implementation 'org.dreamcat:common-core:0.3'
     implementation 'org.dreamcat:common-x:0.3'
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 
     testImplementation 'org.mybatis:mybatis:3.5.10'
     // testRuntimeOnly 'mysql:mysql-connector-java:8.0.29'

@@ -41,7 +41,7 @@ public class JavaMapperTemplate extends TemplateOutput {
         }).collect(Collectors.joining(", "));
 
         if (config.isAddMapperAnnotation()) {
-            this.import_mapper = "\nimport org.apache.ibatis.annotations.Mapper;";
+            this.import_mapper = "import org.apache.ibatis.annotations.Mapper;\n";
             this.at_mapper = "\n@Mapper";
         }
     }

@@ -33,8 +33,7 @@ public class SqlMapperTemplate extends TemplateOutput {
     /**
      * {@code id,created_at,updated_at }
      */
-    public String select_column_list;
-    public String insert_column_list;
+    public String column_list;
     /**
      * {@code #{item.$property,jdbcType=$type}, }
      */
@@ -78,13 +77,12 @@ public class SqlMapperTemplate extends TemplateOutput {
                 .collect(Collectors.joining("\n"));
 
         this.table_name = entity.getTableName();
-        this.select_column_list = String.join(", ", entity.getSelectColumns().keySet());
+        this.column_list = String.join(", ", entity.getEntityColumns().keySet());
 
-        this.insert_column_list = String.join(", ", entity.getInsertColumns().keySet());
-        this.insert_column_value_list = entity.getInsertColumns().values().stream()
+        this.insert_column_value_list = entity.getEntityColumns().values().stream()
                 .map(SqlMapperTemplate::formatInsertColumnValue)
                 .collect(Collectors.joining(", "));
-        this.batch_insert_column_value_list = entity.getInsertColumns().values().stream()
+        this.batch_insert_column_value_list = entity.getEntityColumns().values().stream()
                 .map(SqlMapperTemplate::formatBatchInsertColumnValue)
                 .collect(Collectors.joining(", "));
 
@@ -97,14 +95,14 @@ public class SqlMapperTemplate extends TemplateOutput {
 
         this.primary_key_eq_list = entity.getPrimaryKeyColumns().stream()
                 .map(SqlMapperTemplate::formatColumnEq)
-                .collect(Collectors.joining("\n       and "));
+                .collect(Collectors.joining("\n    and "));
 
         this.update_column_value_list = entity.getNotPrimaryKeyColumns().stream()
                 .map(SqlMapperTemplate::formatColumnEq)
-                .collect(Collectors.joining("\n      , "));
+                .collect(Collectors.joining("\n    , "));
         this.update_by_column_value_list = entity.getColumns().values().stream()
                 .map(SqlMapperTemplate::formatColumnEqBy)
-                .collect(Collectors.joining("\n      , "));
+                .collect(Collectors.joining("\n    , "));
 
         this.update_if_test_column_value_list = entity.getNotPrimaryKeyColumns().stream()
                 .map(SqlMapperTemplate::formatUpdateIfTestColumnValue)
@@ -180,7 +178,7 @@ public class SqlMapperTemplate extends TemplateOutput {
     }
 
     private static final String _all;
-    private static final String _result_map_column = "    <$element column=\"$column\" jdbcType=\"$type\" property=\"$property\" />";
+    private static final String _result_map_column = "    <$element column=\"$column\" jdbcType=\"$type\" property=\"$property\"/>";
     private static final String _insert_column_value = "#{$property,jdbcType=$type}";
     private static final String _batch_insert_column_value = "#{item.$property,jdbcType=$type}";
     private static final String _if_test_column = "      <if test=\"$property != null\">\n"

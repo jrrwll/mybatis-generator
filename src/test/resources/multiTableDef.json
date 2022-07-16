@@ -5,40 +5,61 @@
     {
       "name": "tenant_id",
       "type": "varchar",
+      "unsigned": false,
+      "typeParams": [
+        32
+      ],
       "notNull": true,
-      "comment": "tenant id"
+      "comment": "tenant ID",
+      "autoIncrement": false
     },
     {
       "name": "seq_id",
       "type": "bigint",
+      "unsigned": false,
       "notNull": true,
-      "comment": "seq id"
-    },
-    {
-      "name": "room_id",
-      "type": "varchar",
-      "notNull": true,
-      "comment": "room id"
+      "comment": "seq id",
+      "autoIncrement": false
     },
     {
       "name": "record_date",
       "type": "date",
+      "unsigned": false,
       "notNull": true,
-      "comment": "record time"
+      "comment": "record date",
+      "autoIncrement": false
+    },
+    {
+      "name": "room_id",
+      "type": "varchar",
+      "unsigned": false,
+      "typeParams": [
+        30
+      ],
+      "notNull": true,
+      "comment": "",
+      "autoIncrement": false
     },
     {
       "name": "created_at",
       "type": "datetime",
+      "unsigned": false,
       "notNull": false,
-      "comment": "create time"
+      "defaultValue": "current_timestamp",
+      "autoIncrement": false
     }
   ],
+  "orReplace": false,
+  "ifNotExists": false,
   "primaryKey": {
-    "name": "PK",
     "columns": [
       "tenant_id",
       "seq_id",
       "record_date"
     ]
-  }
+  },
+  "uniqueIndexes": [],
+  "indexes": [],
+  "foreignKeys": [],
+  "rawProperties": "comment 'a live room record'"
 }

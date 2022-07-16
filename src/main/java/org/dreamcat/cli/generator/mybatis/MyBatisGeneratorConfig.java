@@ -19,8 +19,8 @@ public class MyBatisGeneratorConfig {
     private String entityPackageName = "com.example.entity";
     private String mapperPackageName = "com.example.mapper";
 
-    private Set<String> ignoreSelectColumns = new HashSet<>();
-    private Set<String> ignoreInsertColumns = new HashSet<>();
+    private Set<String> ignoreColumns = new HashSet<>();
+    private boolean useIntForTinyAndSmall;
 
     private boolean overwrite;
     private String srcDir;

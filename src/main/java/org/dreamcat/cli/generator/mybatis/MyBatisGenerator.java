@@ -8,12 +8,12 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamcat.cli.generator.mybatis.java.EntityDef;
-import org.dreamcat.cli.generator.mybatis.parser.TableDefSqlParser;
-import org.dreamcat.cli.generator.mybatis.sql.TableDef;
 import org.dreamcat.cli.generator.mybatis.template.JavaConditionTemplate;
 import org.dreamcat.cli.generator.mybatis.template.JavaEntityTemplate;
 import org.dreamcat.cli.generator.mybatis.template.JavaMapperTemplate;
 import org.dreamcat.cli.generator.mybatis.template.SqlMapperTemplate;
+import org.dreamcat.common.sql.SqlUtil;
+import org.dreamcat.common.sql.TableCommonDef;
 
 /**
  * @author Jerry Will
@@ -26,16 +26,15 @@ import org.dreamcat.cli.generator.mybatis.template.SqlMapperTemplate;
 public class MyBatisGenerator {
 
     private MyBatisGeneratorConfig config;
-    private TableDefSqlParser parser;
 
     public void generate(String sql) throws IOException {
-        List<TableDef> tableDefs = parser.parse(sql);
-        for (TableDef tableDef : tableDefs) {
+        List<TableCommonDef> tableDefs = SqlUtil.fromCreateTable(sql);
+        for (TableCommonDef tableDef : tableDefs) {
             generate(tableDef);
         }
     }
 
-    public void generate(TableDef tableDef) throws IOException {
+    public void generate(TableCommonDef tableDef) throws IOException {
         EntityDef entityDef = new EntityDef(tableDef, config);
         String srcDir = config.getSrcDir();
         boolean overwrite = config.isOverwrite();

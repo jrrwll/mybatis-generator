@@ -6,7 +6,7 @@ import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
-import org.dreamcat.cli.generator.mybatis.sql.ColumnDef;
+import org.dreamcat.common.sql.ColumnCommonDef;
 
 /**
  * @author Jerry Will
@@ -24,12 +24,12 @@ public class EntityColumnDef {
     private String javaName;
     private String javaSimpleName;
 
-    public EntityColumnDef(ColumnDef column, MyBatisGeneratorConfig config) {
+    public EntityColumnDef(ColumnCommonDef column, MyBatisGeneratorConfig config) {
         this.name = column.getName();
         this.property = config.getPropertyNameConfig().format(column.getName());
         this.comment = column.getComment();
 
-        mapType(column.getType());
+        mapType(column.getType(), config);
         if (javaType.equals(byte[].class)) {
             javaName = javaSimpleName = "byte[]";
         } else {
@@ -38,7 +38,7 @@ public class EntityColumnDef {
         }
     }
 
-    private void mapType(String type) {
+    private void mapType(String type, MyBatisGeneratorConfig config) {
         switch (type) {
             case "varchar":
             case "char":
@@ -63,7 +63,7 @@ public class EntityColumnDef {
             case "u8":
                 this.type = JDBCType.TINYINT;
                 this.javaType = Byte.class;
-                break;
+                if (config.isUseIntForTinyAndSmall()) break;
             case "smallint":
             case "int16":
             case "uint16":
@@ -71,7 +71,7 @@ public class EntityColumnDef {
             case "u16":
                 this.type = JDBCType.SMALLINT;
                 this.javaType = Short.class;
-                break;
+                if (config.isUseIntForTinyAndSmall()) break;
             case "int":
             case "integer":
             case "int32":

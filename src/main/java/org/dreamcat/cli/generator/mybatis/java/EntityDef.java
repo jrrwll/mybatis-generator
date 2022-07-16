@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Data;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
-import org.dreamcat.cli.generator.mybatis.sql.ColumnDef;
-import org.dreamcat.cli.generator.mybatis.sql.TableDef;
+import org.dreamcat.common.sql.ColumnCommonDef;
+import org.dreamcat.common.sql.TableCommonDef;
 
 /**
  * @author Jerry Will
@@ -29,10 +29,9 @@ public class EntityDef {
     private String mapperName;
     private String conditionName;
 
-    private Map<String, EntityColumnDef> selectColumns = new HashMap<>();
-    private Map<String, EntityColumnDef> insertColumns = new HashMap<>();
+    private Map<String, EntityColumnDef> entityColumns = new HashMap<>();
 
-    public EntityDef(TableDef table, MyBatisGeneratorConfig config) {
+    public EntityDef(TableCommonDef table, MyBatisGeneratorConfig config) {
         this.tableName = table.getName();
 
         this.entityName = config.getEntityNameConfig().format(tableName);
@@ -40,7 +39,7 @@ public class EntityDef {
         this.conditionName = config.getConditionNameConfig().format(tableName);
 
         this.columns = new HashMap<>();
-        for (ColumnDef column : table.getColumns()) {
+        for (ColumnCommonDef column : table.getColumns()) {
             this.columns.put(column.getName(), new EntityColumnDef(column, config));
         }
 
@@ -54,11 +53,8 @@ public class EntityDef {
             if (!pkColumns.contains(name)) {
                 this.notPrimaryKeyColumns.add(column);
             }
-            if (!config.getIgnoreSelectColumns().contains(name)) {
-                selectColumns.put(name, column);
-            }
-            if (!config.getIgnoreInsertColumns().contains(name)) {
-                insertColumns.put(name, column);
+            if (!config.getIgnoreColumns().contains(name)) {
+                entityColumns.put(name, column);
             }
         });
     }
