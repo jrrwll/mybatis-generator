@@ -1,5 +1,4 @@
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
 /*
 1. Create request in
@@ -13,30 +12,8 @@ def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/mav
 def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
 def isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
-}
-
-tasks.withType(Javadoc) {
-    options.encoding = "UTF-8"
-}
-
-tasks.withType(Sign) {
-    onlyIf { isReleaseVersion }
-}
-
-task sourcesJar(type: Jar) {
-    archiveClassifier.set 'sources'
-    from sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar) {
-    archiveClassifier.set 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
 }
 
 def pomConfig = {
@@ -64,8 +41,6 @@ publishing {
         mavenJava(MavenPublication) {
             // components.web for war
             from components.java
-            artifact sourcesJar
-            artifact javadocJar
 
             versionMapping {
                 usage('java-api') {
@@ -89,6 +64,7 @@ publishing {
             }
         }
     }
+
     repositories {
         maven {
             url isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
@@ -97,16 +73,5 @@ publishing {
                 password project.findProperty("oss.password") as String
             }
         }
-    }
-}
-
-signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
-    sign publishing.publications.mavenJava
-}
-
-javadoc {
-    if (JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
     }
 }

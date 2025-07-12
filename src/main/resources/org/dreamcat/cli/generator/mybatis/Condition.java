@@ -1,5 +1,5 @@
-package $mapper_package;
-
+package $condition_package;
+$import_package
 import java.util.*;
 
 /**
@@ -83,7 +83,7 @@ public class $condition_type {
         protected List<Criterion> criteria = new ArrayList<>();
 
         public boolean isValid() {
-            return criteria.size() > 0;
+            return !criteria.isEmpty();
         }
 
         public List<Criterion> getCriteria() {
@@ -111,7 +111,7 @@ public class $condition_type {
             criteria.add(new Criterion(condition, value1, value2));
         }
 
-        $criteria_method_list
+$criteria_method_list
     }
 
     public static class Criterion {

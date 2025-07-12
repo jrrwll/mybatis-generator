@@ -3,10 +3,10 @@ package org.dreamcat.cli.generator.mybatis;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.IOException;
 import java.util.List;
-import org.dreamcat.common.io.ClassPathUtil;
+import org.dreamcat.common.json.DataMapper;
 import org.dreamcat.common.sql.SqlUtil;
 import org.dreamcat.common.sql.TableCommonDef;
-import org.dreamcat.common.x.json.JsonUtil;
+import org.dreamcat.common.util.ClassLoaderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,23 +17,26 @@ import org.junit.jupiter.api.Test;
 class MyBatisGeneratorTest {
 
     MyBatisGeneratorConfig config = new MyBatisGeneratorConfig();
+    DataMapper jsonMapper = DataMapper.build()
+            .setSerializationInclusion(Include.NON_ABSENT)
+            .build();
 
     @BeforeEach
     void init() {
         config.setOverwrite(true);
         config.setSrcDir("src/test/java");
-        config.setPutMapperTogether(true);
         config.setAddMapperAnnotation(true);
-
-        JsonUtil.configure(m -> m.setSerializationInclusion(Include.NON_ABSENT));
+        config.setEnableResultMapWithBLOBs(true);
+        config.setEnableExtendsMapper(true);
     }
 
     @Test
     void test() throws IOException {
-        String sql = ClassPathUtil.getResourceAsString("ddl.sql");
-        List<TableCommonDef> tableDefs = SqlUtil.fromCreateTable(sql);
+        String sql = ClassLoaderUtil.getResourceAsString("ddl.sql");
+        List<TableCommonDef> tableDefs = SqlUtil.parseCreateTable(sql);
         for (TableCommonDef tableDef : tableDefs) {
-            System.out.println(JsonUtil.toJson(tableDef));
+            System.out.println("tableDef: " + tableDef.getName());
+            System.out.println(jsonMapper.toJson(tableDef));
         }
         MyBatisGenerator gen = new MyBatisGenerator(config);
         gen.generate(sql);
@@ -41,16 +44,17 @@ class MyBatisGeneratorTest {
 
     @Test
     void testGenerate() throws IOException {
-        config.setUseLombok(false);
+        config.setEnableLombok(false);
+        config.setAddComments(false);
+        config.setDelimitKeyword('`');
         MyBatisGenerator gen = new MyBatisGenerator(config);
 
-        TableCommonDef singleTableDef = JsonUtil.fromJson(
-                ClassPathUtil.getResource("singleTableDef.json"), TableCommonDef.class);
+        TableCommonDef singleTableDef = jsonMapper.fromJson(
+                ClassLoaderUtil.getResource("singleTableDef.json"), TableCommonDef.class);
         gen.generate(singleTableDef);
 
-        config.setUseLombok(false);
-        TableCommonDef multiTableDef = JsonUtil.fromJson(
-                ClassPathUtil.getResource("multiTableDef.json"), TableCommonDef.class);
+        TableCommonDef multiTableDef = jsonMapper.fromJson(
+                ClassLoaderUtil.getResource("multiTableDef.json"), TableCommonDef.class);
         gen.generate(multiTableDef);
     }
 }

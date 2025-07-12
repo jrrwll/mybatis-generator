@@ -1,0 +1,44 @@
+// buildscript {
+//     repositories {
+//         mavenLocal()
+//         dependencies{
+//             classpath 'org.dreamcat:mybatis-generator-gradle-plugin:0.1-SNAPSHOT'
+//         }
+//     }
+// }
+
+// apply plugin: 'org.dreamcat.mybatis-generator'
+
+plugins {
+    id 'java'
+    id 'org.dreamcat.mybatis-generator' version '0.1-SNAPSHOT'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir '../../src/test/java'
+            srcDir 'gen-java'
+        }
+    }
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+    runtimeOnly 'com.mysql:mysql-connector-j:8.4.0'
+}
+
+mybatisGenerate {
+    srcDir = "../../src/test/java"
+    sqlPath = "../../src/test/resources/ddl.sql"
+    // jdbcUrl = "jdbc:mysql://localhost:3306/test"
+    // jdbcUser = "root"
+    // jdbcPassword = "root"
+    // jdbcDriverClassName = "com.mysql.cj.jdbc.Driver"
+
+    // tableNames = ["bill"]
+    addComments = false
+    entityPackageName = "com.example.entity"
+    mapperPackageName = "com.example.mapper.base"
+    extendsMapperPackageName = "com.example.mapper"
+}

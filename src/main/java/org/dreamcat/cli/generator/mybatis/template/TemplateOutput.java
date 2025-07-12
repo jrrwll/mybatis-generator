@@ -1,5 +1,13 @@
 package org.dreamcat.cli.generator.mybatis.template;
 
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.dreamcat.common.text.InterpolationUtil;
+import org.dreamcat.common.util.ClassLoaderUtil;
+import org.dreamcat.common.util.DateUtil;
+import org.dreamcat.common.util.MapUtil;
+import org.dreamcat.common.util.ReflectUtil;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,11 +15,6 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.dreamcat.common.text.DollarInterpolation;
-import org.dreamcat.common.util.DateUtil;
-import org.dreamcat.common.util.MapUtil;
-import org.dreamcat.common.util.ReflectUtil;
 
 /**
  * @author Jerry Will
@@ -22,37 +25,55 @@ public abstract class TemplateOutput {
 
     public abstract String getTemplate();
 
-    public void write(String outputDir, String name, boolean overwrite) throws IOException {
-        write(new File(outputDir), name, overwrite);
+    public String getExtendsTemplate() {
+        throw new UnsupportedOperationException();
     }
 
-    public void write(File outputDir, String name, boolean overwrite) throws IOException {
+    public File write(File outputDir, String name, boolean overwrite) throws IOException {
+        return write(getTemplate(), outputDir, name, overwrite);
+    }
+
+    public void writeSub(File outputDir, String name, boolean overwrite) throws IOException {
+        write(getExtendsTemplate(), outputDir, name, overwrite);
+    }
+
+    private File write(String template, File outputDir, String name, boolean overwrite) throws IOException {
+        Map<String, String> context = createContext();
+        String content = InterpolationUtil.format(template, context);
+
         File file = new File(outputDir, name);
         if (file.exists()) {
             if (overwrite) {
                 log.warn("overwrite file {}", file);
             } else {
                 log.warn("file {} already exists, skip", file);
-                return;
+                return null;
             }
         }
         log.info("writing to {}", file.getCanonicalPath());
         try (FileWriter w = new FileWriter(file)) {
-            w.write(format());
+            w.write(content);
         }
+        return file;
     }
 
-    public String format() {
-        List<Field> fields = ReflectUtil.retrieveNoStaticFields(getClass());
+    private Map<String, String> createContext() {
+        List<Field> fields = ReflectUtil.retrieveBeanFields(getClass());
         Map<String, String> context = MapUtil.of(
                 "generator_name", "Mybatis-Generator",
                 "username", System.getProperty("user.name"),
-                "date", DateUtil.format(new Date(), "yyyy-MM-dd")
+                "date", DateUtil.formatDate(new Date())
         );
         for (Field field : fields) {
             if (!field.getType().equals(String.class)) continue;
-            context.put(field.getName(), (String) ReflectUtil.getValue(this, field));
+            context.put(field.getName(), (String) ReflectUtil.getFieldValue(this, field));
         }
-        return DollarInterpolation.format(getTemplate(), context);
+        return context;
+    }
+
+    @SneakyThrows
+    static String getResourceAsString(String name) {
+        String filename = "org/dreamcat/cli/generator/mybatis/" + name;
+        return ClassLoaderUtil.getResourceAsString(filename);
     }
 }

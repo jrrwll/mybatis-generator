@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.dreamcat</groupId>
+  <artifactId>mybatis-generator-plugin-maven-example</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <url>https://maven.apache.org</url>
+
+  <properties>
+    <mavenRepo>${env.HOME}/.m2/repository</mavenRepo>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
+    </dependency>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>8.4.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <sourceDirectory>../../src/test/java</sourceDirectory>
+    <outputDirectory>../../build/classes/java/test</outputDirectory>
+    <plugins>
+      <plugin>
+        <!-- mvn mybatis-generator:mybatisGenerate -->
+        <groupId>org.dreamcat</groupId>
+        <artifactId>mybatis-generator-maven-plugin</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <configuration>
+          <srcDir>../../src/test/java</srcDir>
+          <!--<sqlPath>../../src/test/resources/ddl.sql</sqlPath>-->
+          <jdbcUrl>jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false</jdbcUrl>
+          <jdbcUser>root</jdbcUser>
+          <jdbcPassword>root</jdbcPassword>
+          <jdbcDriverClassName>com.mysql.cj.jdbc.Driver</jdbcDriverClassName>
+          <delimitKeyword>`</delimitKeyword>
+          <tableNames>
+            <tableName>bill</tableName>
+          </tableNames>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

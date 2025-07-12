@@ -5,7 +5,7 @@ import static org.dreamcat.common.util.DateUtil.formatDate;
 import static org.dreamcat.common.util.ReflectUtil.forName;
 import static org.dreamcat.common.util.ReflectUtil.invoke;
 import static org.dreamcat.common.util.ReflectUtil.newInstance;
-import static org.dreamcat.common.x.bean.BeanCopyUtil.copy;
+import static org.dreamcat.common.util.BeanUtil.copy;
 
 import com.example.model.LiveRoom;
 import java.io.InputStream;
@@ -17,7 +17,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.dreamcat.common.io.ClassPathUtil;
+import org.dreamcat.common.util.ClassLoaderUtil;
 import org.dreamcat.common.util.DateUtil;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +50,7 @@ class ExampleTest {
         try (SqlSession session = sqlSessionFactory.openSession()) {
             // before
             Statement stmt = session.getConnection().createStatement();
-            stmt.execute(ClassPathUtil.getResourceAsString("ddl.sql"));
+            stmt.execute(ClassLoaderUtil.getResourceAsString("ddl.sql"));
 
             Object mapper = session.getMapper(mapperClass);
             consumer.accept(mapper);

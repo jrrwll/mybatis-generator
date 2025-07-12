@@ -1,0 +1,9 @@
+
+  <select id="selectByPrimaryKeyWithBLOBs" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="base_column_list"/>,
+    <include refid="blob_column_list"/>
+    from
+    <include refid="table_name"/>
+    where $primary_key_eq_list
+  </select>

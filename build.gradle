@@ -1,58 +1,53 @@
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-}
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    }
 
-apply plugin: 'java-library'
-compileJava.options.encoding = 'UTF-8'
-compileTestJava.options.encoding = 'UTF-8'
-sourceCompatibility = JavaVersion.VERSION_1_8
+    apply plugin: 'java-library'
+    compileJava.options.encoding = 'UTF-8'
+    compileTestJava.options.encoding = 'UTF-8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
 
-version = VERSION
-group = GROUP_ID
+    version = VERSION
+    group = GROUP_ID
 
-ext {
-    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-    slf4jVersion = "1.7.36"
-    // https://mvnrepository.com/artifact/org.projectlombok/lombok
-    lombokVersion = "1.18.22"
-    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-    junitVersion = "5.8.2"
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-    jacksonVersion = '2.13.1'
-}
+    dependencies {
+        compileOnly libs.lombok
+        annotationProcessor libs.lombok
+        testCompileOnly libs.lombok
+        testAnnotationProcessor libs.lombok
+        testImplementation libs.jupiter.api
+        testRuntimeOnly libs.jupiter.engine
+    }
 
-dependencies {
-    compileOnly "org.projectlombok:lombok:$lombokVersion"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    testCompileOnly "org.projectlombok:lombok:$lombokVersion"
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation "org.slf4j:slf4j-simple:$slf4jVersion"
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    test {
+        useJUnitPlatform()
+    }
 
-    implementation 'org.dreamcat:common-core:0.3'
-    implementation 'org.dreamcat:common-x:0.3'
-    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    tasks.register('printVersion') {
+        doLast {
+            print version
+        }
+    }
 
-    testImplementation 'org.mybatis:mybatis:3.5.10'
-    // testRuntimeOnly 'mysql:mysql-connector-java:8.0.29'
-    testRuntimeOnly 'com.h2database:h2:2.1.214'
-}
-
-apply from: "./publish.gradle"
-
-task printVersion {
-    doLast {
-        print version
+    if (file("${projectDir}/gradle.properties").exists()) {
+        apply from: new File(rootDir, 'gradle/publish.gradle')
     }
 }
 
-test {
-    useJUnitPlatform()
+dependencies {
+    implementation libs.slf4j.api
+    implementation libs.slf4j.simple
+    implementation libs.dreamcat.common
+    implementation libs.bundles.jackson
+    implementation libs.jsqlparser
+
+    testImplementation 'org.mybatis:mybatis:3.5.10'
+    // testRuntimeOnly 'mysql:mysql-connector-java:8.0.29'
+    // https://mvnrepository.com/artifact/com.h2database/h2
+    testRuntimeOnly 'com.h2database:h2:2.3.232'
 }
 
 processTestResources {

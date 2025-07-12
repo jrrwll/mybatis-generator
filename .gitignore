@@ -6,10 +6,11 @@
 *.iws
 *.ipr
 out
-.gradle
+.gradle/
 build
 .DS_Store
 generated
 generated_tests
+target/
 src/test/java/com/example/entity/
 src/test/java/com/example/mapper/

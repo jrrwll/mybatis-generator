@@ -1,9 +1,4 @@
-pluginManagement {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-    }
-}
-
 rootProject.name = 'mybatis-generator'
+
+include 'mybatis-generator-gradle-plugin'
+project(":mybatis-generator-gradle-plugin").projectDir = file("$rootDir/plugin-gradle")

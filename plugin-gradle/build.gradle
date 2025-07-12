@@ -1,0 +1,33 @@
+apply plugin: 'java-gradle-plugin'
+
+dependencies {
+    implementation gradleApi()
+    implementation libs.dreamcat.common
+    implementation libs.bundles.jackson
+    implementation "org.dreamcat:mybatis-generator:${version}"
+}
+
+// https://plugins.gradle.org/docs/publish-plugin
+gradlePlugin {
+    automatedPublishing = false
+    plugins {
+        mybatisGenerate {
+            id = 'org.dreamcat.mybatis-generator'
+            implementationClass = 'org.dreamcat.cli.generator.mybatis.MybatisGeneratorPlugin'
+        }
+    }
+}
+
+// pluginBundle {
+//     website = 'https://github.com/jrrwll/mybatis-generator'
+//     vcsUrl = 'https://github.com/jrrwll/mybatis-generator'
+//     description = 'gradle plugin for Mybatis generator'
+//
+//     plugins {
+//         apidocGenerate {
+//             displayName = 'Mybatis Generator plugin'
+//             description = 'generate Mybatis xml and java code'
+//             tags = ['mybatis', 'generator']
+//         }
+//     }
+// }

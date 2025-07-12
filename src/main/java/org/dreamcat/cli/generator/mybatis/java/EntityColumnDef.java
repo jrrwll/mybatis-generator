@@ -1,12 +1,13 @@
 package org.dreamcat.cli.generator.mybatis.java;
 
-import java.math.BigDecimal;
-import java.sql.JDBCType;
-import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
 import org.dreamcat.common.sql.ColumnCommonDef;
+
+import java.math.BigDecimal;
+import java.sql.JDBCType;
+import java.util.Date;
 
 /**
  * @author Jerry Will
@@ -17,16 +18,20 @@ import org.dreamcat.common.sql.ColumnCommonDef;
 public class EntityColumnDef {
 
     private String name;
+    private String sqlName;
     private String property;
     private String comment;
-    private JDBCType type; //
+    private JDBCType type;
     private Class<?> javaType;
     private String javaName;
     private String javaSimpleName;
 
-    public EntityColumnDef(ColumnCommonDef column, MyBatisGeneratorConfig config) {
-        this.name = column.getName();
-        this.property = config.getPropertyNameConfig().format(column.getName());
+    public EntityColumnDef(ColumnCommonDef column, String tableName, MyBatisGeneratorConfig config) {
+        this.sqlName = this.name = column.getName();
+        if (config.getDelimitKeyword() != null) {
+            this.sqlName = config.getDelimitKeyword() + this.name + config.getDelimitKeyword();
+        }
+        this.property = config.formatPropertyName(column.getName(), tableName);
         this.comment = column.getComment();
 
         mapType(column.getType(), config);
@@ -38,18 +43,34 @@ public class EntityColumnDef {
         }
     }
 
+    public boolean isBlob() {
+        return type == JDBCType.BLOB || type == JDBCType.CLOB ||
+                type == JDBCType.LONGVARBINARY ||
+                type == JDBCType.BINARY || type == JDBCType.VARBINARY;
+    }
+
     private void mapType(String type, MyBatisGeneratorConfig config) {
-        switch (type) {
+        if (type == null) return;
+        switch (type.toLowerCase()) {
             case "varchar":
             case "char":
             case "string":
-            case "text":
+                this.type = JDBCType.VARCHAR;
+                this.javaType = String.class;
+                break;
             case "longvarchar":
+                this.type = JDBCType.LONGVARCHAR;
+                this.javaType = String.class;
+                break;
+            case "text":
             case "tinytext":
             case "mediumtext":
             case "longtext":
-                this.type = JDBCType.VARCHAR;
-                this.javaType = String.class;
+            case "clob":
+            case "mediumclob":
+            case "longclob":
+                this.type = JDBCType.CLOB;
+                this.javaType = String.class; // maybe overflow since max size of string is 2GB
                 break;
             case "bool":
             case "boolean":
@@ -63,7 +84,7 @@ public class EntityColumnDef {
             case "u8":
                 this.type = JDBCType.TINYINT;
                 this.javaType = Byte.class;
-                if (config.isUseIntForTinyAndSmall()) break;
+                if (!config.isForceInt()) break;
             case "smallint":
             case "int16":
             case "uint16":
@@ -71,7 +92,7 @@ public class EntityColumnDef {
             case "u16":
                 this.type = JDBCType.SMALLINT;
                 this.javaType = Short.class;
-                if (config.isUseIntForTinyAndSmall()) break;
+                if (!config.isForceInt()) break;
             case "int":
             case "integer":
             case "int32":
@@ -94,12 +115,12 @@ public class EntityColumnDef {
             case "f32":
                 this.type = JDBCType.FLOAT;
                 this.javaType = Float.class;
-                break;
+                if (!config.isForceDecimal()) break;
             case "double":
             case "f64":
                 this.type = JDBCType.DOUBLE;
                 this.javaType = Double.class;
-                break;
+                if (!config.isForceDecimal()) break;
             case "decimal":
                 this.type = JDBCType.DECIMAL;
                 this.javaType = BigDecimal.class;

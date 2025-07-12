@@ -1,0 +1,183 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.dreamcat</groupId>
+  <artifactId>mybatis-generator-maven-plugin</artifactId>
+  <packaging>maven-plugin</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <description>maven plugin for mybatis generator</description>
+  <url>https://github.com/jrrwll/mybatis-generator</url>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>tuke</id>
+      <name>Jerry Will</name>
+      <email>jrriwll@gmial.com</email>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/jrrwll/mybatis-generator.git</url>
+  </scm>
+
+  <properties>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven/maven-plugin-api -->
+    <!-- https://mvnrepository.com/artifact/org.apache.maven/maven-core -->
+    <maven-plugin.version>3.8.8</maven-plugin.version>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugin-tools/maven-plugin-annotations -->
+    <maven-plugin-tools.version>3.8.2</maven-plugin-tools.version>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-plugin-plugin -->
+    <maven-plugin-plugin.version>3.8.2</maven-plugin-plugin.version>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-javadoc-plugin -->
+    <maven-javadoc.version>3.3.2</maven-javadoc.version>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-source-plugin -->
+    <maven-source.version>3.2.1</maven-source.version>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+    <maven-compiler.version>3.10.1</maven-compiler.version>
+    <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-gpg-plugin -->
+    <maven-gpg.version>3.0.1</maven-gpg.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>${maven-plugin.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <version>${maven-plugin-tools.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${maven-plugin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dreamcat</groupId>
+      <artifactId>common</artifactId>
+      <version>0.5-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dreamcat</groupId>
+      <artifactId>mybatis-generator</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- maven plugin develop -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>${maven-plugin-plugin.version}</version>
+      </plugin>
+      <!-- compiler-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler.version}</version>
+        <configuration>
+          <source>8</source>
+          <target>8</target>
+        </configuration>
+      </plugin>
+      <!-- https://maven.apache.org/plugins/maven-source-plugin/usage.html -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${maven-source.version}</version>
+        <executions>
+          <execution>
+            <id>attach-source</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/usage.html -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc.version}</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- https://maven.apache.org/plugins/maven-gpg-plugin/usage.html -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>${maven-gpg.version}</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <!-- mvn install -Dmaven.test.skip=true -Dgpg.passphrase=$GPG_PASSPHRASE -->
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <passphrase>${env.GPG_PASSPHRASE}</passphrase>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>sonatype-nexus-staging</id>
+      <name>Nexus Release Repository</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+    </repository>
+  </distributionManagement>
+</project>
+<!--
+# create a maven-plugin project
+mvn archetype:generate \
+    -DgroupId=org.dreamcat \
+    -DartifactId=mybatis-generator-maven-plugin \
+    -DarchetypeArtifactId=maven-archetype-mojo \
+    -DinteractiveMode=false
+
+mvn archetype:generate \
+    -DgroupId=org.dreamcat \
+    -DartifactId=plugin-maven-example \
+    -DinteractiveMode=false
+-->

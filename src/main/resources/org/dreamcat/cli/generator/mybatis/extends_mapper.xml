@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="$extends_mapper_package.$extends_mapper_name">
+
+  <resultMap id="BaseResultMap" type="$result_map" extends="$mapper_package.$mapper_name.BaseResultMap"/>
+$extends_result_map_with_blobs
+  <sql id="base_column_list">
+    <include refid="$mapper_package.$mapper_name.base_column_list"/>
+  </sql>
+$extends_blob_column_list
+</mapper>

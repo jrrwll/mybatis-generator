@@ -6,15 +6,11 @@
 $result_map_id_list
 $result_map_result_list
   </resultMap>
-
-  <sql id="table_name">
-    $table_name
-  </sql>
-
+$result_map_with_blobs
   <sql id="base_column_list">
-    $column_list
+    $base_column_list
   </sql>
-
+$blob_column_list
   <sql id="where_criteria">
     <where>
       <foreach collection="criteriaList" item="criteria" separator="or">
@@ -76,15 +72,13 @@ $result_map_result_list
   </sql>
 
   <insert id="insert" parameterType="$result_map">
-    insert into
-    <include refid="table_name"/>
+    insert into $table_name
     ($column_list)
     values ($insert_column_value_list)
   </insert>
 
   <insert id="insertSelective" parameterType="$result_map">
-    insert into
-    <include refid="table_name"/>
+    insert into $table_name
     <trim prefix="(" suffix=")" suffixOverrides=",">
 $if_test_column_list
     </trim>
@@ -94,8 +88,7 @@ $if_test_column_value_list
   </insert>
 
   <insert id="batchInsert" parameterType="$result_map">
-    insert into
-    <include refid="table_name"/>
+    insert into $table_name
     <trim prefix="(" suffix=")" suffixOverrides=",">
       $column_list
     </trim>
@@ -109,15 +102,13 @@ $if_test_column_value_list
     </foreach>
   </insert>
 
-  <delete id="delete">
-    delete from
-    <include refid="table_name"/>
+  <delete id="deleteByPrimaryKey">
+    delete from $table_name
     where $primary_key_eq_list
   </delete>
 
-  <delete id="deleteBy">
-    delete from
-    <include refid="table_name"/>
+  <delete id="delete">
+    delete from $table_name
     <if test="_parameter != null">
       <include refid="where_criteria"/>
     </if>
@@ -126,19 +117,17 @@ $if_test_column_value_list
     </if>
   </delete>
 
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+    select
+    <include refid="base_column_list"/>
+    from $table_name
+    where $primary_key_eq_list
+  </select>
+$select_by_primary_key_with_blobs
   <select id="select" resultMap="BaseResultMap">
     select
     <include refid="base_column_list"/>
-    from
-    <include refid="table_name"/>
-    where $primary_key_eq_list
-  </select>
-
-  <select id="selectBy" resultMap="BaseResultMap">
-    select
-    <include refid="base_column_list"/>
-    from
-    <include refid="table_name"/>
+    from $table_name
     <if test="_parameter != null">
       <include refid="where_criteria"/>
     </if>
@@ -149,34 +138,30 @@ $if_test_column_value_list
       limit #{limit} c #{offset}
     </if>
   </select>
-
-  <select id="countBy" resultType="java.lang.Long">
-    select count(*) from
-    <include refid="table_name"/>
+$select_with_blobs
+  <select id="count" resultType="java.lang.Long">
+    select count(*) from $table_name
     <if test="_parameter != null">
       <include refid="where_criteria"/>
     </if>
   </select>
 
-  <update id="update" parameterType="$result_map">
-    update
-    <include refid="table_name"/>
+  <update id="updateByPrimaryKey" parameterType="$result_map">
+    update $table_name
     set $update_column_value_list
     where $primary_key_eq_list
   </update>
 
-  <update id="updateSelective" parameterType="$result_map">
-    update
-    <include refid="table_name"/>
+  <update id="updateByPrimaryKeySelective" parameterType="$result_map">
+    update $table_name
     <set>
 $update_if_test_column_value_list
     </set>
     where $primary_key_eq_list
   </update>
 
-  <update id="updateBy">
-    update
-    <include refid="table_name"/>
+  <update id="update">
+    update $table_name
     set
     $update_by_column_value_list
     <if test="condition != null">
@@ -184,9 +169,8 @@ $update_if_test_column_value_list
     </if>
   </update>
 
-  <update id="updateSelectiveBy">
-    update
-    <include refid="table_name"/>
+  <update id="updateSelective">
+    update $table_name
     <set>
 $update_by_if_test_column_value_list
     </set>
