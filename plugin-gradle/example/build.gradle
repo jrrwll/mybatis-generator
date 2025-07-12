@@ -38,6 +38,7 @@ mybatisGenerate {
 
     // tableNames = ["bill"]
     addComments = false
+    enableExtendsMapper = true
     entityPackageName = "com.example.entity"
     mapperPackageName = "com.example.mapper.base"
     extendsMapperPackageName = "com.example.mapper"

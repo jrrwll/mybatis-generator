@@ -5,6 +5,8 @@ import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 
+import java.util.Arrays;
+
 /**
  * @author Jerry Will
  * @version 2024-12-22
@@ -72,6 +74,10 @@ public abstract class MybatisGeneratorExtension {
     abstract ListProperty<String> getPrunedStatements();
 
     abstract ListProperty<String> getTableNames();
+
+    public MybatisGeneratorExtension() {
+        getEnableExtendsMapper().convention(true);
+    }
 
     abstract NamedDomainObjectContainer<Table> getTables();
 

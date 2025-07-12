@@ -7,7 +7,6 @@ $import_java_package
  *
  * @author $username
  * @version $date
- * @see <a href="https://github.com/jrrwll">Jerry Will's Github</a>
  */$at_annotation
 public class $entity_type implements Serializable {
 

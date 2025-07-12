@@ -5,7 +5,6 @@ $extends_import_package
  *
  * @author $username
  * @version $date
- * @see <a href="https://github.com/jrrwll">Jerry Will's Github</a>
  */$extends_at_annotation
 public interface $extends_mapper_type extends $mapper_type {
 }

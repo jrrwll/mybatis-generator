@@ -7,7 +7,6 @@ import java.util.*;
  *
  * @author $username
  * @version $date
- * @see <a href="https://github.com/jrrwll">Jerry Will's Github</a>
  */
 public class $condition_type {
 

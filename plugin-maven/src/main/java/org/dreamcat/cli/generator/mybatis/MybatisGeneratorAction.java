@@ -17,6 +17,7 @@ import org.dreamcat.common.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -92,8 +93,7 @@ public class MybatisGeneratorAction implements Runnable {
                 logInfo("parsed tableDefs: {}", JsonUtil.toJson(tableDefs));
                 gen.generate(tableDefs);
             } catch (Exception e) {
-                logError("failed to generate sql on {} ", file);
-                logError(e);
+                log.error("failed to generate sql on {} " + file, e);
             }
         }
     }
@@ -106,7 +106,9 @@ public class MybatisGeneratorAction implements Runnable {
         logInfo("use jdbcDriverClassName: {}", jdbcDriverClassName);
         logInfo("use tableNames: {}", JsonUtil.toJson(tableNames));
 
-        ClassLoader userCodeClassLoader = MavenUtil.buildUserCodeClassLoader(project, mojo.getLocalRepository(), log);
+        URLClassLoader userCodeClassLoader = MavenUtil.buildUserCodeClassLoader(project, mojo.getLocalRepository(), log);
+        log.info("resolved classLoader urls: " + JsonUtil.toJson(userCodeClassLoader.getURLs()));
+
         DriverUtil.runIsolated(jdbcUrl, jdbcUser, jdbcPassword, userCodeClassLoader, jdbcDriverClassName, connection -> {
             logInfo("fetching tables from JDBC connection");
             try {
@@ -120,8 +122,8 @@ public class MybatisGeneratorAction implements Runnable {
                     gen.generate(tableDef);
                 }
             } catch (Exception e) {
-                logError("failed to generate sql on jdbc {} for user {}", jdbcUrl, jdbcUser);
-                logError(e);
+                log.error(StringUtil.formatMessage("failed to generate sql on jdbc {} for user {}",
+                        jdbcUrl, jdbcUser), e);
             }
             return null;
         });
@@ -168,6 +170,7 @@ public class MybatisGeneratorAction implements Runnable {
         config.setForceInt(mojo.getForceInt());
         config.setForceDecimal(mojo.getForceDecimal());
         config.setEnableResultMapWithBLOBs(mojo.getEnableResultMapWithBLOBs());
+        config.setEnableExtendsMapper(mojo.getEnableExtendsMapper());
         config.setAddMapperAnnotation(mojo.getAddMapperAnnotation());
         config.setEnableLombok(mojo.getEnableLombok());
         config.setAddComments(mojo.getAddComments());
@@ -220,17 +223,5 @@ public class MybatisGeneratorAction implements Runnable {
 
     private void logInfo(String msg, Object... args) {
         log.info(StringUtil.formatMessage(msg, args));
-    }
-
-    private void logWarn(String msg, Object... args) {
-        log.warn(StringUtil.formatMessage(msg, args));
-    }
-
-    private void logError(String msg, Object... args) {
-        log.error(StringUtil.formatMessage(msg, args));
-    }
-
-    private void logError(Throwable e) {
-        log.error(e);
     }
 }

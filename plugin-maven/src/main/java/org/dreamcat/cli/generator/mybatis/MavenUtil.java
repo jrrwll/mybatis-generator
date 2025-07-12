@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -25,21 +24,17 @@ import java.util.stream.Stream;
  */
 public class MavenUtil {
 
-    public static ClassLoader buildUserCodeClassLoader(
+    public static URLClassLoader buildUserCodeClassLoader(
             MavenProject project, ArtifactRepository localRepository, Log log) throws Exception {
         Set<String> classDirs = new HashSet<>();
         classDirs.add(getClassDir(project));
         classDirs.addAll(orEmpty(getCompileClasspath(project)));
         classDirs.addAll(orEmpty(getRuntimeClasspath(project)));
-        log.info("classDirs: " + JsonUtil.toJson(classDirs));
 
         List<File> dependencies = getDependencies(project, localRepository);
-        log.info("dependencies: " + JsonUtil.toJson(dependencies));
 
         URL[] urls = Stream.concat(dependencies.stream(), classDirs.stream().map(File::new))
                 .map(UrlUtil::toURL).toArray(URL[]::new);
-        log.info("resolved classLoader urls: " + JsonUtil.toJson(urls));
-
         return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
     }
 

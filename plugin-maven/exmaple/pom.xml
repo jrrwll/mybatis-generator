@@ -22,6 +22,9 @@
       <version>8.4.0</version>
     </dependency>
   </dependencies>
+  <!--
+  mvn dependency:go-offline mybatis-generator:mybatisGenerate
+  -->
   <build>
     <sourceDirectory>../../src/test/java</sourceDirectory>
     <outputDirectory>../../build/classes/java/test</outputDirectory>
@@ -34,7 +37,7 @@
         <configuration>
           <srcDir>../../src/test/java</srcDir>
           <!--<sqlPath>../../src/test/resources/ddl.sql</sqlPath>-->
-          <jdbcUrl>jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false</jdbcUrl>
+          <jdbcUrl>jdbc:mysql://192.168.1.11:3306/test?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false</jdbcUrl>
           <jdbcUser>root</jdbcUser>
           <jdbcPassword>root</jdbcPassword>
           <jdbcDriverClassName>com.mysql.cj.jdbc.Driver</jdbcDriverClassName>
@@ -42,6 +45,10 @@
           <tableNames>
             <tableName>bill</tableName>
           </tableNames>
+          <enableExtendsMapper>true</enableExtendsMapper>
+          <entityPackageName>com.example.entity</entityPackageName>
+          <mapperPackageName>com.example.mapper.base</mapperPackageName>
+          <extendsMapperPackageName>com.example.mapper</extendsMapperPackageName>
         </configuration>
       </plugin>
     </plugins>
