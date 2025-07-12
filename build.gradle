@@ -1,14 +1,19 @@
 allprojects {
     repositories {
-        mavenLocal()
+        // mavenLocal()
         mavenCentral()
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url 'https://central.sonatype.com/repository/maven-snapshots/' }
     }
 
     apply plugin: 'java-library'
     compileJava.options.encoding = 'UTF-8'
     compileTestJava.options.encoding = 'UTF-8'
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    javadoc.options.encoding = 'UTF-8'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
     version = VERSION
     group = GROUP_ID
@@ -35,6 +40,7 @@ allprojects {
     if (file("${projectDir}/gradle.properties").exists()) {
         apply from: new File(rootDir, 'gradle/publish.gradle')
     }
+    apply from: new File(rootDir, 'gradle/tasks-jar.gradle')
 }
 
 dependencies {
