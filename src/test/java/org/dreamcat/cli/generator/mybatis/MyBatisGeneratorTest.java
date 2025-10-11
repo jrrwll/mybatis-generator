@@ -8,12 +8,14 @@ import org.dreamcat.common.sql.SqlUtil;
 import org.dreamcat.common.sql.TableCommonDef;
 import org.dreamcat.common.util.ClassLoaderUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Jerry Will
  * @version 2022-07-12
  */
+@Tag("integration")
 class MyBatisGeneratorTest {
 
     MyBatisGeneratorConfig config = new MyBatisGeneratorConfig();

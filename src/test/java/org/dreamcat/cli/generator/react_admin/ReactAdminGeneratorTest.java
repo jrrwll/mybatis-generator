@@ -2,6 +2,7 @@ package org.dreamcat.cli.generator.react_admin;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dreamcat.common.util.ClassLoaderUtil;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.io.IOException;
  * @version 2025-09-29
  */
 @Slf4j
+@Tag("integration")
 class ReactAdminGeneratorTest {
 
     @Test

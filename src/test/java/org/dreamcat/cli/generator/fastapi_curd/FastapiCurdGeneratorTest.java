@@ -3,6 +3,7 @@ package org.dreamcat.cli.generator.fastapi_curd;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamcat.common.io.FileUtil;
 import org.dreamcat.common.util.ClassLoaderUtil;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import java.io.IOException;
  * @version 2025-09-26
  */
 @Slf4j
+@Tag("integration")
 class FastapiCurdGeneratorTest {
 
     @Test

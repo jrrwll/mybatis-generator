@@ -23,29 +23,29 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             artifact_name: linux-amd64
-            native_dir: build/native
+            native_dir: build/native/nativeCompile
           - os: macos-latest
             platform: macos
             artifact_name: macos-amd64
-            native_dir: build/native
+            native_dir: build/native/nativeCompile
           - os: macos-latest
             platform: macos-aarch64
             artifact_name: macos-aarch64
-            native_dir: build/native
+            native_dir: build/native/nativeCompile
           - os: windows-latest
             platform: windows
             artifact_name: windows-amd64
-            native_dir: build/native
+            native_dir: build/native/nativeCompile
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup JDK
-        uses: actions/setup-java@v4
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: '25'
+          distribution: 'graalvm'
 
       # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
       # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
