@@ -44,7 +44,7 @@ jobs:
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '25'
+          java-version: '21'
           distribution: 'graalvm'
 
       # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
