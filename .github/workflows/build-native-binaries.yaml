@@ -11,7 +11,6 @@ on:
   push:
     tags:
       - 'v*'        # such as: v1.0.0
-    branches: [ "master" ]
 
 jobs:
   build-native:
@@ -79,11 +78,6 @@ jobs:
             find build -name "*.dll" -exec cp {} dist/ \; 2>/dev/null || true
             find build -name "*.so" -exec cp {} dist/ \; 2>/dev/null || true
             find build -name "*.dylib" -exec cp {} dist/ \; 2>/dev/null || true
-            
-            echo "Version: ${{ github.ref_name }}" > dist/version.txt
-            echo "Platform: ${{ matrix.platform }}" >> dist/version.txt
-            echo "Build Date: $(date -u)" >> dist/version.txt
-            echo "Commit: ${{ github.sha }}" >> dist/version.txt
 
             echo "Packaged files:"
             ls -la dist/
@@ -98,6 +92,8 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: build-native
     if: success() && startsWith(github.ref, 'refs/tags/')
 
@@ -120,6 +116,7 @@ jobs:
               cd "final-release/$platform"
               tar -czf "../$platform.tar.gz" . 2>/dev/null || true
               cd ../..
+              rm -rf "final-release/$platform"
             fi
           done
 
