@@ -1,18 +1,22 @@
 package org.dreamcat.cli.generator.mybatis.template;
 
+import org.dreamcat.cli.generator.base.ColumnDef;
+import org.dreamcat.cli.generator.base.TableDef;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
-import org.dreamcat.cli.generator.mybatis.java.EntityColumnDef;
-import org.dreamcat.cli.generator.mybatis.java.EntityDef;
+import org.dreamcat.cli.generator.mybatis.MybatisTemplateOutput;
 import org.dreamcat.common.text.InterpolationUtil;
 import org.dreamcat.common.util.MapUtil;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
  * @author Jerry Will
  * @version 2021-12-06
  */
-public class SqlMapperTemplate extends TemplateOutput {
+public class SqlMapperTemplate extends MybatisTemplateOutput {
 
     public String entity_package;
     public String entity_name;
@@ -35,6 +39,7 @@ public class SqlMapperTemplate extends TemplateOutput {
     public String column_list;
     public String base_column_list; // column_list without blob columns
 
+    public String insert_generated_key = "";
     /**
      * {@code #{item.$property,jdbcType=$type}, }
      */
@@ -75,69 +80,87 @@ public class SqlMapperTemplate extends TemplateOutput {
     public String extends_result_map_with_blobs = "";
     public String extends_blob_column_list = "";
 
-    public SqlMapperTemplate(EntityDef entity, MyBatisGeneratorConfig config) {
+    // functions
+    private final UnaryOperator<String> propertyFormatter;
+    private final UnaryOperator<String> sqlNameFormatter;
+
+    public SqlMapperTemplate(TableDef table, MyBatisGeneratorConfig config) {
+        String tableName = table.getTableName();
+        this.propertyFormatter = c -> config.formatPropertyName(c, tableName);
+        this.sqlNameFormatter = config::formatSqlName;
+
         this.entity_package = config.getEntityPackageName();
-        this.entity_name = entity.getEntityName();
+        this.entity_name = config.formatEntityName(tableName);
         this.mapper_package = config.getMapperPackageName();
-        this.mapper_name = entity.getMapperName();
+        this.mapper_name = config.formatMapperName(tableName);
         this.result_map = entity_package + "." + entity_name;
 
-        this.result_map_id_list = entity.getPrimaryKeyColumns().stream()
+        this.result_map_id_list = table.getPrimaryKeyColumns().stream()
                 .map(it -> formatResultMapColumn(it, "id"))
                 .collect(Collectors.joining("\n"));
-        this.result_map_result_list = entity.getNotPrimaryKeyColumns().stream()
+        this.result_map_result_list = table.getNotPrimaryKeyColumns().stream()
                 .map(it -> formatResultMapColumn(it, "result"))
                 .collect(Collectors.joining("\n"));
 
-        this.table_name = entity.getTableSqlName();
-        this.base_column_list = this.column_list = entity.getEntityColumns().values().stream()
-                .map(EntityColumnDef::getSqlName).collect(Collectors.joining(", "));
-
-        this.insert_column_value_list = entity.getEntityColumns().values().stream()
-                .map(SqlMapperTemplate::formatInsertColumnValue)
-                .collect(Collectors.joining(", "));
-        this.batch_insert_column_value_list = entity.getEntityColumns().values().stream()
-                .map(SqlMapperTemplate::formatBatchInsertColumnValue)
+        this.table_name = config.formatSqlName(tableName);
+        this.base_column_list = this.column_list = table.getNotIgnoredColumns().values().stream()
+                .map(c -> config.formatSqlName(c.getColumnName()))
                 .collect(Collectors.joining(", "));
 
-        this.if_test_column_list = entity.getColumns().values().stream()
-                .map(SqlMapperTemplate::formatIfTestColumn)
+        if (config.isEnableGeneratedKeys() && table.getPrimaryKeyColumns().size() == 1) {
+            String column = table.getPrimaryKeyColumns().get(0).getColumnName();
+            String property = this.propertyFormatter.apply(column);
+            this.insert_generated_key = InterpolationUtil.format(_insert_generated_key,
+                    "property", property,
+                    "column", column);
+        }
+        this.insert_column_value_list = table.getNotIgnoredColumns().values().stream()
+                .map(this::formatInsertColumnValue)
+                .collect(Collectors.joining(", "));
+        this.batch_insert_column_value_list = table.getNotIgnoredColumns().values().stream()
+                .map(this::formatBatchInsertColumnValue)
+                .collect(Collectors.joining(", "));
+
+        this.if_test_column_list = table.getColumns().values().stream()
+                .map(this::formatIfTestColumn)
                 .collect(Collectors.joining("\n"));
-        this.if_test_column_value_list = entity.getColumns().values().stream()
-                .map(SqlMapperTemplate::formatIfTestColumnValue)
+        this.if_test_column_value_list = table.getColumns().values().stream()
+                .map(this::formatIfTestColumnValue)
                 .collect(Collectors.joining("\n"));
 
-        this.primary_key_eq_list = entity.getPrimaryKeyColumns().stream()
-                .map(SqlMapperTemplate::formatColumnEq)
+        this.primary_key_eq_list = table.getPrimaryKeyColumns().stream()
+                .map(this::formatColumnEq)
                 .collect(Collectors.joining("\n    and "));
 
-        this.update_column_value_list = entity.getNotPrimaryKeyColumns().stream()
-                .map(SqlMapperTemplate::formatColumnEq)
+        this.update_column_value_list = table.getNotPrimaryKeyColumns().stream()
+                .map(this::formatColumnEq)
                 .collect(Collectors.joining("\n    , "));
-        this.update_by_column_value_list = entity.getColumns().values().stream()
-                .map(SqlMapperTemplate::formatColumnEqBy)
+        this.update_by_column_value_list = table.getColumns().values().stream()
+                .map(this::formatColumnEqBy)
                 .collect(Collectors.joining("\n    , "));
 
-        this.update_if_test_column_value_list = entity.getNotPrimaryKeyColumns().stream()
-                .map(SqlMapperTemplate::formatUpdateIfTestColumnValue)
+        this.update_if_test_column_value_list = table.getNotPrimaryKeyColumns().stream()
+                .map(this::formatUpdateIfTestColumnValue)
                 .collect(Collectors.joining("\n      ,\n"));
-        this.update_by_if_test_column_value_list = entity.getNotPrimaryKeyColumns().stream()
-                .map(SqlMapperTemplate::formatUpdateByIfTestColumnValue)
+        this.update_by_if_test_column_value_list = table.getNotPrimaryKeyColumns().stream()
+                .map(this::formatUpdateByIfTestColumnValue)
                 .collect(Collectors.joining("\n      ,\n"));
 
-        boolean needBlob = config.isEnableResultMapWithBLOBs() && entity.hasBlobColumns();
+        boolean needBlob = config.isEnableResultMapWithBLOBs() && table.hasBlobColumns();
         if (needBlob) {
-            String result_map_blob_list = entity.getBlobColumns().stream()
+            String result_map_blob_list = table.getBlobColumns().stream()
                     .map(it -> formatResultMapColumn(it, "result"))
                     .collect(Collectors.joining("\n"));
             this.result_map_with_blobs = InterpolationUtil.format(_result_map_with_blobs,
                     "result_map", result_map, "result_map_blob_list", result_map_blob_list);
-            this.base_column_list = entity.getBaseColumns().stream()
-                    .map(EntityColumnDef::getSqlName).collect(Collectors.joining(", "));
+            this.base_column_list = table.getBaseColumns().stream()
+                    .map(c -> config.formatSqlName(c.getColumnName()))
+                    .collect(Collectors.joining(", "));
 
             this.blob_column_list = InterpolationUtil.format(_blob_column_list, "blob_column_list",
-                    entity.getBlobColumns().stream()
-                            .map(EntityColumnDef::getSqlName).collect(Collectors.joining(", ")));
+                    table.getBlobColumns().stream()
+                            .map(c -> config.formatSqlName(c.getColumnName()))
+                            .collect(Collectors.joining(", ")));
 
             this.select_by_primary_key_with_blobs = InterpolationUtil.format(_select_by_primary_key_with_blobs,
                     "primary_key_eq_list", primary_key_eq_list);
@@ -146,7 +169,7 @@ public class SqlMapperTemplate extends TemplateOutput {
 
         if (config.isEnableExtendsMapper()) {
             this.extends_mapper_package = config.getExtendsMapperPackageName();
-            this.extends_mapper_name = entity.getExtendsMapperName();
+            this.extends_mapper_name = config.formatExtendsMapperName(tableName);
             if (needBlob) {
                 this.extends_result_map_with_blobs = InterpolationUtil.format(_extends_result_map_with_blobs,
                         "result_map", result_map,
@@ -162,68 +185,81 @@ public class SqlMapperTemplate extends TemplateOutput {
         return _all;
     }
 
-    @Override
-    public String getExtendsTemplate() {
-        return _all_sub;
+    public void writeSub(File outputDir, String name, boolean overwrite) throws IOException {
+        write(_all_sub, outputDir, name, overwrite);
     }
 
-    private static String formatResultMapColumn(EntityColumnDef column, String element) {
+    private String formatResultMapColumn(ColumnDef column, String element) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_result_map_column, MapUtil.of(
                 "element", element,
-                "column", column.getName(),
+                "column", column.getColumnName(),
                 "type", column.getType(),
-                "property", column.getProperty()));
+                "property", property));
     }
 
-    private static String formatInsertColumnValue(EntityColumnDef column) {
+    private String formatInsertColumnValue(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_insert_column_value, MapUtil.of(
-                "property", column.getProperty(),
+                "property", property,
                 "type", column.getType()));
     }
 
-    private static String formatBatchInsertColumnValue(EntityColumnDef column) {
+    private String formatBatchInsertColumnValue(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_batch_insert_column_value, MapUtil.of(
-                "property", column.getProperty(),
+                "property", property,
                 "type", column.getType()));
     }
 
-    private static String formatIfTestColumn(EntityColumnDef column) {
+    private String formatIfTestColumn(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
+        String columnSqlName = this.sqlNameFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_if_test_column, MapUtil.of(
-                "property", column.getProperty(),
-                "column", column.getSqlName()));
+                "property", property,
+                "column", columnSqlName));
     }
 
-    private static String formatIfTestColumnValue(EntityColumnDef column) {
+    private String formatIfTestColumnValue(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_if_test_column_value, MapUtil.of(
-                "property", column.getProperty(),
+                "property", property,
                 "type", column.getType()));
     }
 
-    private static String formatColumnEq(EntityColumnDef column) {
+    private String formatColumnEq(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
+        String columnSqlName = this.sqlNameFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_column_eq, MapUtil.of(
-                "column", column.getSqlName(),
-                "property", column.getProperty(),
+                "column", columnSqlName,
+                "property", property,
                 "type", column.getType()));
     }
 
-    private static String formatColumnEqBy(EntityColumnDef column) {
+    private String formatColumnEqBy(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
+        String columnSqlName = this.sqlNameFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_column_eq_by, MapUtil.of(
-                "column", column.getSqlName(),
-                "property", column.getProperty(),
+                "column", columnSqlName,
+                "property", property,
                 "type", column.getType()));
     }
 
-    private static String formatUpdateIfTestColumnValue(EntityColumnDef column) {
+    private String formatUpdateIfTestColumnValue(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
+        String columnSqlName = this.sqlNameFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_update_if_test_column_value, MapUtil.of(
-                "column", column.getSqlName(),
-                "property", column.getProperty(),
+                "column", columnSqlName,
+                "property", property,
                 "type", column.getType()));
     }
 
-    private static String formatUpdateByIfTestColumnValue(EntityColumnDef column) {
+    private String formatUpdateByIfTestColumnValue(ColumnDef column) {
+        String property = this.propertyFormatter.apply(column.getColumnName());
+        String columnSqlName = this.sqlNameFormatter.apply(column.getColumnName());
         return InterpolationUtil.format(_update_by_if_test_column_value, MapUtil.of(
-                "column", column.getSqlName(),
-                "property", column.getProperty(),
+                "column", columnSqlName,
+                "property", property,
                 "type", column.getType()));
     }
 
@@ -231,6 +267,8 @@ public class SqlMapperTemplate extends TemplateOutput {
             + "property=\"$property\"/>";
     static final String _insert_column_value = "#{$property,jdbcType=$type}";
     static final String _batch_insert_column_value = "#{item.$property,jdbcType=$type}";
+    static final String _insert_generated_key = "\n    useGeneratedKeys=\"true\" keyProperty=\"$property\" keyColumn=\"$column\"";
+
     static final String _if_test_column = "      <if test=\"$property != null\">\n"
             + "        $column,\n"
             + "      </if>";

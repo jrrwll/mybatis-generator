@@ -1,8 +1,9 @@
 package org.dreamcat.cli.generator.mybatis.template;
 
+import org.dreamcat.cli.generator.base.ColumnDef;
+import org.dreamcat.cli.generator.base.TableDef;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
-import org.dreamcat.cli.generator.mybatis.java.EntityColumnDef;
-import org.dreamcat.cli.generator.mybatis.java.EntityDef;
+import org.dreamcat.cli.generator.mybatis.MybatisTemplateOutput;
 import org.dreamcat.common.text.InterpolationUtil;
 import org.dreamcat.common.util.MapUtil;
 import org.dreamcat.common.util.ObjectUtil;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  * @author Jerry Will
  * @version 2022-07-12
  */
-public class JavaEntityTemplate extends TemplateOutput {
+public class JavaEntityTemplate extends MybatisTemplateOutput {
 
     public String entity_package;
     public String entity_type;
@@ -47,15 +48,19 @@ public class JavaEntityTemplate extends TemplateOutput {
     public String append_property_list;
     public String to_string = "";
 
-    public JavaEntityTemplate(EntityDef entity, MyBatisGeneratorConfig config) {
+    public JavaEntityTemplate(TableDef table, MyBatisGeneratorConfig config) {
+        String tableName = table.getTableName();
+
         this.entity_package = config.getEntityPackageName();
-        this.entity_type = entity.getEntityName();
+        this.entity_type = config.formatEntityName(tableName);
 
         Set<String> java_imports = new HashSet<>();
         java_imports.add("import java.io.Serializable;");
         List<String> propertyDeclareList = new ArrayList<>();
         List<String> appendPropertyList = new ArrayList<>();
-        for (EntityColumnDef c : entity.getColumns().values()) {
+        for (ColumnDef c : table.getColumns().values()) {
+            String property = config.formatPropertyName(c.getColumnName(), tableName);
+
             String _property_declare_tmp = _property_declare;
             if (ObjectUtil.isNotBlank(c.getComment()) && config.isAddComments()) {
                 _property_declare_tmp = _property_declare_with_comment;
@@ -63,9 +68,9 @@ public class JavaEntityTemplate extends TemplateOutput {
             propertyDeclareList.add(InterpolationUtil.format(_property_declare_tmp, MapUtil.of(
                     "comment", c.getComment(),
                     "type", c.getJavaSimpleName(),
-                    "property", c.getProperty()), ""));
+                    "property", property), ""));
             appendPropertyList.add(InterpolationUtil.format(_append_property, MapUtil.of(
-                    "property", c.getProperty())));
+                    "property", property)));
             if (Date.class.equals(c.getJavaType())) {
                 java_imports.add("import java.util.Date;");
             } else if (BigDecimal.class.equals(c.getJavaType())) {
@@ -83,11 +88,13 @@ public class JavaEntityTemplate extends TemplateOutput {
             at_annotation = "\n@Getter\n@Setter\n@ToString";
         } else {
             List<String> getSetList = new ArrayList<>();
-            for (EntityColumnDef c : entity.getEntityColumns().values()) {
+            for (ColumnDef c : table.getNotIgnoredColumns().values()) {
+                String property = config.formatPropertyName(c.getColumnName(), tableName);
+
                 getSetList.add(InterpolationUtil.format(_property_get_set, MapUtil.of(
-                        "property", c.getProperty(),
+                        "property", property,
                         "type", c.getJavaSimpleName(),
-                        "property_capital", StringUtil.toCapitalCase(c.getProperty())
+                        "property_capital", StringUtil.toCapitalCase(property)
                 )));
             }
             this.property_get_set_list = "\n" + String.join("\n\n", getSetList);

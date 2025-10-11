@@ -1,0 +1,3 @@
+from corepy.dao import DaoService
+
+dao_service = DaoService()

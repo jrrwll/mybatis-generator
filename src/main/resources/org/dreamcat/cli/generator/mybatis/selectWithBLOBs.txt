@@ -12,6 +12,6 @@
       order by #{orderBy}
     </if>
     <if test="limit != 0">
-      limit #{limit} c #{offset}
+      limit #{limit} offset #{offset}
     </if>
   </select>

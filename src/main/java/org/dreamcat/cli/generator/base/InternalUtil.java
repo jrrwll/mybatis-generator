@@ -1,9 +1,10 @@
-package org.dreamcat.cli.generator.mybatis;
+package org.dreamcat.cli.generator.base;
 
 import lombok.SneakyThrows;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
@@ -13,6 +14,7 @@ import org.dreamcat.common.sql.IndexCommonDef;
 import org.dreamcat.common.sql.JdbcColumnDef;
 import org.dreamcat.common.sql.JdbcUtil;
 import org.dreamcat.common.sql.TableCommonDef;
+import org.dreamcat.common.util.NumberUtil;
 import org.dreamcat.common.util.ObjectUtil;
 import org.dreamcat.common.util.StringUtil;
 
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
  * @author Jerry Will
  * @version 2024-12-22
  */
-class InternalUtil {
+public class InternalUtil {
 
     // sql parser
     @SneakyThrows
@@ -66,9 +68,18 @@ class InternalUtil {
             columnDef.setPosition(++position);
             columnDef.setName(unwrapText(columnDefinition.getColumnName()));
 
-            String dataType = columnDefinition.getColDataType().getDataType();
-            String[] typeAndParams = dataType.split(" *\\(| *\\)");
-            columnDef.setType(typeAndParams[0]);
+            ColDataType dataType = columnDefinition.getColDataType();
+            columnDef.setType(dataType.getDataType());
+            if (ObjectUtil.isNotEmpty(dataType.getArgumentsStringList())) {
+                List<String> argumentsStringList = dataType.getArgumentsStringList();
+                List<Integer> typeParams = argumentsStringList.stream()
+                        .map(NumberUtil::parseInt).filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                if (typeParams.size() == argumentsStringList.size()) {
+                    columnDef.setTypeParams(typeParams);
+                }
+
+            }
 
             List<String> columnSpecs = columnDefinition.getColumnSpecs();
             columnDef.setComment(findComment(columnSpecs));
@@ -111,6 +122,7 @@ class InternalUtil {
             String option = optionsStrings.get(i);
             if ("comment".equalsIgnoreCase(option) && i < n - 1) {
                 String comment = optionsStrings.get(i + 1);
+                if ("=".equals(comment)) comment = optionsStrings.get(i + 2);
                 return unwrapText(comment);
             }
         }
@@ -237,5 +249,22 @@ class InternalUtil {
         }
         String content = String.join("\n", outputLines);
         FileUtil.write(file, content);
+    }
+
+    // utils, same behavior as `uv init`
+    public static String formatPackageName(String dir) {
+        String name;
+        int i = dir.lastIndexOf(File.separatorChar);
+        if (i < 0) {
+            name = dir;
+        } else {
+            name = dir.substring(i + 1);
+        }
+
+        name = name.replace(' ', '_').replace('-', '_');
+        if (name.chars().anyMatch(c -> !StringUtil.isVariableChar((char)c))) {
+            throw new IllegalArgumentException("dir name must be a variable-like name, got `" + name + "`");
+        }
+        return name;
     }
 }

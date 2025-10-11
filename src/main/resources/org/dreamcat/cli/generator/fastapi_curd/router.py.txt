@@ -1,0 +1,68 @@
+from typing import Any
+
+from corepy.api import ApiResult, ListResult, PageResult
+from fastapi import Query
+from fastapi.routing import APIRouter
+
+from ..common.dao import dao_service
+from ..common.deps import SessionDep
+from ..entities.${file_name} import ${class_name}
+from ..models.${file_name} import *
+
+router = APIRouter(prefix="/$router_name")
+
+
+@router.get("/list")
+def _list(
+        session: SessionDep,
+        page_no: int = Query(default=1${page_no_alias}),
+        page_size: int = Query(default=20${page_size_alias}),
+) -> ApiResult[PageResult[${class_name}SimplePublic]]:
+    res = dao_service.page_entities_as_model(session, ${class_name}, page_no, page_size, ${class_name}SimplePublic)
+    return ApiResult.ok(res)
+
+
+@router.get("")
+def _get(
+        session: SessionDep, id: int
+) -> ApiResult[${class_name}Public]:
+    entity = dao_service.get_required_entity(session, ${class_name}, id)
+    model = ${class_name}Public(**entity.model_dump())
+    return ApiResult.ok(model)
+
+
+# only support: id=1&id=2&id=2
+@router.get("/getMany")
+def _get_many(
+        session: SessionDep, id: list[int] = Query(min_length=1),
+) -> ApiResult[ListResult[${class_name}Public]]:
+    entities = [dao_service.get_required_entity(session, ${class_name}, i) for i in id]
+    models = [${class_name}Public(**entity.model_dump()) for entity in entities]
+    return ApiResult.ok(ListResult.create(models))
+
+
+@router.post("")
+def _create(
+        session: SessionDep, params: ${class_name}Create,
+) -> ApiResult[${class_name}Public]:
+    entity = dao_service.create_entity(session, ${class_name}, params)
+    model = ${class_name}Public(**entity.model_dump())
+    return ApiResult.ok(model)
+
+
+@router.put("")
+def _update(
+        session: SessionDep, params: ${class_name}Update,
+) -> ApiResult[${class_name}Public]:
+    entity = dao_service.get_required_entity(session, ${class_name}, params.id)
+    dao_service.update_entity(session, entity, params)
+    model = ${class_name}Public(**entity.model_dump())
+    return ApiResult.ok(model)
+
+
+@router.delete("")
+def _delete(
+        session: SessionDep, id: int
+) -> ApiResult[Any]:
+    dao_service.delete_entity(session, ${class_name}, id)
+    return ApiResult.ok()

@@ -1,45 +1,47 @@
-package org.dreamcat.cli.generator.mybatis.java;
+package org.dreamcat.cli.generator.base;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
 import org.dreamcat.common.sql.ColumnCommonDef;
+import org.dreamcat.common.util.ObjectUtil;
 
 import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Jerry Will
  * @version 2021-12-06
  */
 @Data
-@NoArgsConstructor
-public class EntityColumnDef {
+public class ColumnDef {
 
-    private String name;
-    private String sqlName;
-    private String property;
+    private String columnName;
     private String comment;
+
     private JDBCType type;
     private Class<?> javaType;
     private String javaName;
     private String javaSimpleName;
 
-    public EntityColumnDef(ColumnCommonDef column, String tableName, MyBatisGeneratorConfig config) {
-        this.sqlName = this.name = column.getName();
-        if (config.getDelimitKeyword() != null) {
-            this.sqlName = config.getDelimitKeyword() + this.name + config.getDelimitKeyword();
-        }
-        this.property = config.formatPropertyName(column.getName(), tableName);
+    private Integer typeLength;
+    private boolean notNull;
+
+    public ColumnDef(ColumnCommonDef column, SqlBasedGeneratorConfig config) {
+        this.columnName = column.getName();
         this.comment = column.getComment();
 
-        mapType(column.getType(), config);
+        mapType(column.getType(), column.getTypeParams(), config);
         if (javaType.equals(byte[].class)) {
             javaName = javaSimpleName = "byte[]";
         } else {
             javaName = javaType.getName();
             javaSimpleName = javaType.getSimpleName();
+        }
+
+        this.notNull = column.isNotNull();
+        if (ObjectUtil.isNotEmpty(column.getTypeParams())) {
+            this.typeLength = column.getTypeParams().get(0);
         }
     }
 
@@ -49,7 +51,7 @@ public class EntityColumnDef {
                 type == JDBCType.BINARY || type == JDBCType.VARBINARY;
     }
 
-    private void mapType(String type, MyBatisGeneratorConfig config) {
+    private void mapType(String type, List<Integer> typeParams, SqlBasedGeneratorConfig config) {
         if (type == null) return;
         switch (type.toLowerCase()) {
             case "varchar":
@@ -78,6 +80,13 @@ public class EntityColumnDef {
                 this.javaType = Boolean.class;
                 break;
             case "tinyint":
+                if (ObjectUtil.isNotEmpty(typeParams) && typeParams.get(0) == 1) {
+                    if (config.isTinyint1AsBool()) {
+                        this.type = JDBCType.BOOLEAN;
+                        this.javaType = Boolean.class;
+                        break;
+                    }
+                }
             case "int8":
             case "uint8":
             case "i8":

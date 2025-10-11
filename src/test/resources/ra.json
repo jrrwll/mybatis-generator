@@ -1,0 +1,9 @@
+{
+  "outputDir": "build/cli/generated/react-admin-gen",
+  "overwrite": true,
+  "addComments": true,
+  "preferCamelCase": true,
+  "enableChinese": true,
+  "disableScript": true,
+  "viteApiUrl": "http://localhost:8080/api/v1"
+}

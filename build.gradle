@@ -1,3 +1,8 @@
+plugins {
+// https://central.sonatype.com/artifact/org.graalvm.buildtools/native-gradle-plugin
+    id 'org.graalvm.buildtools.native' version '0.11.1'
+}
+
 allprojects {
     repositories {
         // mavenLocal()
@@ -40,7 +45,6 @@ allprojects {
     if (file("${projectDir}/gradle.properties").exists()) {
         apply from: new File(rootDir, 'gradle/publish.gradle')
     }
-    apply from: new File(rootDir, 'gradle/tasks-jar.gradle')
 }
 
 dependencies {
@@ -56,8 +60,21 @@ dependencies {
     testRuntimeOnly 'com.h2database:h2:2.3.232'
 }
 
+apply from: new File(rootDir, 'gradle/tasks-jar.gradle')
+
+
 processTestResources {
     from('src/test/java') {
         include '**/*.xml'
     }
 }
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": "org.dreamcat.cli.generator.Main",
+        )
+    }
+}
+
+apply from: new File(rootDir, 'gradle/native-image.gradle')

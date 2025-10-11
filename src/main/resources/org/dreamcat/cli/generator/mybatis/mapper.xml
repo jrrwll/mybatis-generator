@@ -71,13 +71,13 @@ $blob_column_list
     </where>
   </sql>
 
-  <insert id="insert" parameterType="$result_map">
+  <insert id="insert" parameterType="$result_map"$insert_generated_key>
     insert into $table_name
     ($column_list)
     values ($insert_column_value_list)
   </insert>
 
-  <insert id="insertSelective" parameterType="$result_map">
+  <insert id="insertSelective" parameterType="$result_map"$insert_generated_key>
     insert into $table_name
     <trim prefix="(" suffix=")" suffixOverrides=",">
 $if_test_column_list
@@ -135,7 +135,7 @@ $select_by_primary_key_with_blobs
       order by #{orderBy}
     </if>
     <if test="limit != 0">
-      limit #{limit} c #{offset}
+      limit #{limit} offset #{offset}
     </if>
   </select>
 $select_with_blobs

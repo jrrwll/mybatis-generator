@@ -1,0 +1,38 @@
+import logging
+
+from corepy.api import ApiResult
+from corepy.lang import walk_and_import_modules
+from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from . import router
+
+logger = logging.getLogger(__name__)
+
+API_PREFIX_STR = '/api/v1'
+
+app = FastAPI(
+    title='$project_name',
+)
+
+for m in walk_and_import_modules(router):
+    app.include_router(m.router, prefix=f"{API_PREFIX_STR}")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.exception_handler(Exception)
+async def _exception_handler(_: Request, e: Exception) -> Response:
+    msg = str(e)
+    logger.exception(f"unknown error: {msg}")
+
+    content = ApiResult(err_code="err", err_args=dict(msg=msg))
+    return JSONResponse(
+        content.model_dump(exclude_none=True),
+    )

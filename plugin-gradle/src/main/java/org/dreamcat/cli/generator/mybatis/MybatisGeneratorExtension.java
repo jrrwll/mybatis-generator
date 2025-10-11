@@ -5,8 +5,6 @@ import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 
-import java.util.Arrays;
-
 /**
  * @author Jerry Will
  * @version 2024-12-22
@@ -45,11 +43,15 @@ public abstract class MybatisGeneratorExtension {
 
     abstract Property<Boolean> getForceDecimal();
 
+    abstract Property<Boolean> getTinyint1AsBool();
+
     abstract Property<Boolean> getEnableResultMapWithBLOBs();
 
     abstract Property<Boolean> getEnableExtendsMapper();
 
     abstract Property<Boolean> getAddMapperAnnotation();
+
+    abstract Property<Boolean> getEnableGeneratedKeys();
 
     abstract Property<Boolean> getEnableLombok();
 
@@ -57,19 +59,29 @@ public abstract class MybatisGeneratorExtension {
 
     abstract Property<Character> getDelimitKeyword();
 
-    abstract Property<String> getNamePrefix();
+    abstract Property<String> getNameRegex();
 
-    abstract Property<String> getNameSuffix();
+    abstract Property<String> getNameReplacement();
 
-    abstract Property<String> getEntityName();
+    abstract Property<String> getEntityNamePrefix();
 
-    abstract Property<String> getMapperName();
+    abstract Property<String> getEntityNameSuffix();
 
-    abstract Property<String> getExtendsMapperName();
+    abstract Property<String> getMapperNamePrefix();
 
-    abstract Property<String> getConditionName();
+    abstract Property<String> getMapperNameSuffix();
 
-    abstract Property<String> getPropertyName();
+    abstract Property<String> getExtendsMapperNamePrefix();
+
+    abstract Property<String> getExtendsMapperNameSuffix();
+
+    abstract Property<String> getConditionNamePrefix();
+
+    abstract Property<String> getConditionNameSuffix();
+
+    abstract Property<String> getPropertyNameRegex();
+
+    abstract Property<String> getPropertyNameReplacement();
 
     abstract ListProperty<String> getPrunedStatements();
 

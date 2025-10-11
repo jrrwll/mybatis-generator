@@ -1,0 +1,16 @@
+from typing import Any
+
+from corepy.dao import DaoService
+from sqlmodel import SQLModel
+
+
+class MyDaoService(DaoService):
+
+    def deleted_column[E: SQLModel](self, entity_type: type[E]) -> Any:
+        return entity_type.${delete_column}
+
+    def order_by_clauses[E: SQLModel](self, entity_type: type[E]) -> Any:
+        return entity_type.${order_column}.desc()
+
+
+dao_service = MyDaoService()

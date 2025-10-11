@@ -1,5 +1,6 @@
 package org.dreamcat.cli.generator.mybatis;
 
+import org.dreamcat.cli.generator.base.InternalUtil;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig.StatementType;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig.TableConfig;
 import org.dreamcat.cli.generator.mybatis.MybatisGeneratorExtension.Table;
@@ -151,6 +152,15 @@ public class MybatisGeneratorTask extends DefaultTask {
             Map<String, Table> tables, List<String> tableNames) {
         MyBatisGeneratorConfig config = new MyBatisGeneratorConfig();
         setIfNotNull(config::setOverwrite, extension.getOverwrite());
+        setIfNotNull(config::setAddComments, extension.getAddComments());
+        List<String> ignoreColumns = extension.getIgnoreColumns().getOrNull();
+        if (ignoreColumns != null) {
+            config.setIgnoreColumns(new HashSet<>(ignoreColumns));
+        }
+        setIfNotNull(config::setForceInt, extension.getForceInt());
+        setIfNotNull(config::setForceDecimal, extension.getForceDecimal());
+        setIfNotNull(config::setTinyint1AsBool, extension.getTinyint1AsBool());
+
         String srcDir = extension.getSrcDir().getOrNull();
         if (srcDir == null) {
             throw new IllegalArgumentException("srcDir is null, please setup it");
@@ -164,25 +174,25 @@ public class MybatisGeneratorTask extends DefaultTask {
         setIfNotNull(config::setExtendsMapperPackageName, extension.getExtendsMapperPackageName());
         setIfNotNull(config::setConditionPackageName, extension.getConditionPackageName());
 
-        List<String> ignoreColumns = extension.getIgnoreColumns().getOrNull();
-        if (ignoreColumns != null) {
-            config.setIgnoreColumns(new HashSet<>(ignoreColumns));
-        }
-        setIfNotNull(config::setForceInt, extension.getForceInt());
-        setIfNotNull(config::setForceDecimal, extension.getForceDecimal());
         setIfNotNull(config::setEnableResultMapWithBLOBs, extension.getEnableResultMapWithBLOBs());
         setIfNotNull(config::setEnableExtendsMapper, extension.getEnableExtendsMapper());
         setIfNotNull(config::setAddMapperAnnotation, extension.getAddMapperAnnotation());
+        setIfNotNull(config::setEnableGeneratedKeys, extension.getEnableGeneratedKeys());
         setIfNotNull(config::setEnableLombok, extension.getEnableLombok());
-        setIfNotNull(config::setAddComments, extension.getAddComments());
         setIfNotNull(config::setDelimitKeyword, extension.getDelimitKeyword());
-        setIfNotNull(config::setNamePrefix, extension.getNamePrefix());
-        setIfNotNull(config::setNameSuffix, extension.getNameSuffix());
-        setIfNotNull(config::setEntityName, extension.getEntityName());
-        setIfNotNull(config::setMapperName, extension.getMapperName());
-        setIfNotNull(config::setExtendsMapperName, extension.getExtendsMapperName());
-        setIfNotNull(config::setConditionName, extension.getConditionName());
-        setIfNotNull(config::setPropertyName, extension.getPropertyName());
+
+        setIfNotNull(config::setNameRegex, extension.getNameRegex());
+        setIfNotNull(config::setNameReplacement, extension.getNameReplacement());
+        setIfNotNull(config::setEntityNamePrefix, extension.getEntityNamePrefix());
+        setIfNotNull(config::setEntityNameSuffix, extension.getEntityNameSuffix());
+        setIfNotNull(config::setMapperNamePrefix, extension.getMapperNamePrefix());
+        setIfNotNull(config::setMapperNameSuffix, extension.getMapperNameSuffix());
+        setIfNotNull(config::setExtendsMapperNamePrefix, extension.getExtendsMapperNamePrefix());
+        setIfNotNull(config::setExtendsMapperNameSuffix, extension.getExtendsMapperNameSuffix());
+        setIfNotNull(config::setConditionNamePrefix, extension.getConditionNamePrefix());
+        setIfNotNull(config::setConditionNameSuffix, extension.getConditionNameSuffix());
+        setIfNotNull(config::setPropertyNameRegex, extension.getPropertyNameRegex());
+        setIfNotNull(config::setPropertyNameReplacement, extension.getPropertyNameReplacement());
 
         List<String> prunedStatements = extension.getPrunedStatements().getOrElse(Collections.emptyList());
         if (ObjectUtil.isNotEmpty(prunedStatements)) {

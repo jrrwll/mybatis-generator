@@ -1,10 +1,13 @@
 package org.dreamcat.cli.generator.mybatis.template;
 
+import org.dreamcat.cli.generator.base.TableDef;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
-import org.dreamcat.cli.generator.mybatis.java.EntityDef;
+import org.dreamcat.cli.generator.mybatis.MybatisTemplateOutput;
 import org.dreamcat.common.text.InterpolationUtil;
 import org.dreamcat.common.util.MapUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +16,7 @@ import java.util.stream.Collectors;
  * @author Jerry Will
  * @version 2021-12-08
  */
-public class JavaMapperTemplate extends TemplateOutput {
+public class JavaMapperTemplate extends MybatisTemplateOutput {
 
     public String entity_package;
     public String mapper_package;
@@ -36,22 +39,25 @@ public class JavaMapperTemplate extends TemplateOutput {
     public String extends_import_package = "";
     public String extends_at_annotation = "";
 
-    public JavaMapperTemplate(EntityDef entity, MyBatisGeneratorConfig config) {
+    public JavaMapperTemplate(TableDef table, MyBatisGeneratorConfig config) {
+        String tableName = table.getTableName();
+
         this.entity_package = config.getEntityPackageName();
         this.mapper_package = config.getMapperPackageName();
-        this.condition_type = entity.getConditionName();
-        this.entity_type = entity.getEntityName();
-        this.mapper_type = entity.getMapperName();
+        this.condition_type = config.formatConditionName(tableName);
+        this.entity_type = config.formatEntityName(tableName);
+        this.mapper_type = config.formatMapperName(tableName);
 
-        this.primary_key_declare_list = entity.getPrimaryKeyColumns().stream().map(c -> {
+        this.primary_key_declare_list = table.getPrimaryKeyColumns().stream().map(c -> {
             String javaName = c.getJavaName();
             if (javaName.startsWith("java.lang") || javaName.startsWith("java.util")) {
                 javaName = c.getJavaSimpleName();
             }
-            return formatPrimaryKeyDeclare(c.getProperty(), javaName);
+            String property = config.formatPropertyName(c.getColumnName(), tableName);
+            return formatPrimaryKeyDeclare(property, javaName);
         }).collect(Collectors.joining(", "));
 
-        if (config.isEnableResultMapWithBLOBs() && entity.hasBlobColumns()) {
+        if (config.isEnableResultMapWithBLOBs() && table.hasBlobColumns()) {
             this.select_by_primary_key_with_blobs = InterpolationUtil.format(_select_by_primary_key_with_blobs,
                     "entity_type", entity_type, "primary_key_declare_list", primary_key_declare_list);
             this.select_with_blobs = InterpolationUtil.format(_select_with_blobs,
@@ -60,7 +66,7 @@ public class JavaMapperTemplate extends TemplateOutput {
 
         if (config.isEnableExtendsMapper()) {
             this.extends_mapper_package = config.getExtendsMapperPackageName();
-            this.extends_mapper_type = entity.getExtendsMapperName();
+            this.extends_mapper_type = config.formatExtendsMapperName(tableName);
         }
 
         List<String> imports = new ArrayList<>();
@@ -85,11 +91,14 @@ public class JavaMapperTemplate extends TemplateOutput {
         }
 
         if (!imports.isEmpty()) {
-            this.import_package = imports.stream().map(s -> "import " + s + ";\n").collect(Collectors.joining());
+            this.import_package = imports.stream()
+                    .map(s -> "import " + s + ";\n")
+                    .collect(Collectors.joining());
         }
         if (!extends_imports.isEmpty()) {
-            this.extends_import_package =
-                    "\n" + extends_imports.stream().map(s -> "import " + s + ";\n").collect(Collectors.joining());
+            this.extends_import_package = "\n" + extends_imports.stream()
+                    .map(s -> "import " + s + ";\n")
+                    .collect(Collectors.joining());
         }
     }
 
@@ -98,9 +107,8 @@ public class JavaMapperTemplate extends TemplateOutput {
         return _all;
     }
 
-    @Override
-    public String getExtendsTemplate() {
-        return _all_sub;
+    public void writeSub(File outputDir, String name, boolean overwrite) throws IOException {
+        write(_all_sub, outputDir, name, overwrite);
     }
 
     private static String formatPrimaryKeyDeclare(String property, String type) {

@@ -1,8 +1,9 @@
 package org.dreamcat.cli.generator.mybatis.template;
 
+import org.dreamcat.cli.generator.base.ColumnDef;
+import org.dreamcat.cli.generator.base.TableDef;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig;
-import org.dreamcat.cli.generator.mybatis.java.EntityColumnDef;
-import org.dreamcat.cli.generator.mybatis.java.EntityDef;
+import org.dreamcat.cli.generator.mybatis.MybatisTemplateOutput;
 import org.dreamcat.common.text.InterpolationUtil;
 import org.dreamcat.common.util.MapUtil;
 import org.dreamcat.common.util.StringUtil;
@@ -16,7 +17,7 @@ import java.util.Map;
  * @author Jerry Will
  * @version 2022-07-12
  */
-public class JavaConditionTemplate extends TemplateOutput {
+public class JavaConditionTemplate extends MybatisTemplateOutput {
 
     public String condition_package;
     public String condition_type;
@@ -28,39 +29,44 @@ public class JavaConditionTemplate extends TemplateOutput {
     public String criteria_method_list;
     public String import_package = "";
 
-    public JavaConditionTemplate(EntityDef entity, MyBatisGeneratorConfig config) {
+    public JavaConditionTemplate(TableDef table, MyBatisGeneratorConfig config) {
+        String tableName = table.getTableName();
+
         this.condition_package = config.getConditionPackageName();
-        this.condition_type = entity.getConditionName();
+        this.condition_type = config.formatConditionName(tableName);
 
         List<String> columnEnumList = new ArrayList<>();
         List<String> criteriaMethodList = new ArrayList<>();
-        for (EntityColumnDef c : entity.getColumns().values()) {
+        for (ColumnDef c : table.getColumns().values()) {
+            String property = config.formatPropertyName(c.getColumnName(), tableName);
+            String columnSqlName = config.formatSqlName(c.getColumnName());
+
             columnEnumList.add(InterpolationUtil.format(_column_enum, MapUtil.of(
-                    "column", c.getName(),
-                    "column_upper", c.getName().toUpperCase())));
+                    "column", c.getColumnName(),
+                    "column_upper", c.getColumnName().toUpperCase())));
             if (c.getJavaType().equals(String.class)) {
                 criteriaMethodList.add(InterpolationUtil.format(_criteria_method_str, MapUtil.of(
-                        "property", c.getProperty(),
-                        "property_capital", StringUtil.toCapitalCase(c.getProperty()),
-                        "column", c.getSqlName())));
+                        "property", property,
+                        "property_capital", StringUtil.toCapitalCase(property),
+                        "column", columnSqlName)));
             } else {
                 criteriaMethodList.add(InterpolationUtil.format(_criteria_method, MapUtil.of(
-                        "property", c.getProperty(),
-                        "property_capital", StringUtil.toCapitalCase(c.getProperty()),
-                        "column", c.getSqlName(),
+                        "property", property,
+                        "property_capital", StringUtil.toCapitalCase(property),
+                        "column", columnSqlName,
                         "type", "String")));
                 criteriaMethodList.add(InterpolationUtil.format(_criteria_method_list, MapUtil.of(
-                        "property", c.getProperty(),
-                        "property_capital", StringUtil.toCapitalCase(c.getProperty()),
-                        "column", c.getSqlName(),
+                        "property", property,
+                        "property_capital", StringUtil.toCapitalCase(property),
+                        "column", columnSqlName,
                         "suffix", "Str",
                         "type", "String")));
             }
 
             Map<String, String> m = MapUtil.of(
-                    "property", c.getProperty(),
-                    "property_capital", StringUtil.toCapitalCase(c.getProperty()),
-                    "column", c.getSqlName(),
+                    "property", property,
+                    "property_capital", StringUtil.toCapitalCase(property),
+                    "column", columnSqlName,
                     "suffix", "",
                     "type", c.getJavaSimpleName());
             criteriaMethodList.add(InterpolationUtil.format(_criteria_method, m));

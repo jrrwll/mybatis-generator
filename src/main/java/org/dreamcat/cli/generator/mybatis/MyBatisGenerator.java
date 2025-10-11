@@ -2,20 +2,18 @@ package org.dreamcat.cli.generator.mybatis;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dreamcat.cli.generator.mybatis.java.EntityDef;
+import org.dreamcat.cli.generator.base.InternalUtil;
+import org.dreamcat.cli.generator.base.SqlBasedGenerator;
+import org.dreamcat.cli.generator.base.TableDef;
 import org.dreamcat.cli.generator.mybatis.template.JavaConditionTemplate;
 import org.dreamcat.cli.generator.mybatis.template.JavaEntityTemplate;
 import org.dreamcat.cli.generator.mybatis.template.JavaMapperTemplate;
 import org.dreamcat.cli.generator.mybatis.template.SqlMapperTemplate;
-import org.dreamcat.common.sql.TableCommonDef;
 import org.dreamcat.common.util.AssertUtil;
 import org.dreamcat.common.util.ObjectUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Getter
-public class MyBatisGenerator {
+public class MyBatisGenerator implements SqlBasedGenerator {
 
     protected final MyBatisGeneratorConfig config;
 
@@ -35,30 +33,10 @@ public class MyBatisGenerator {
         AssertUtil.requireNotNull(config.getSrcDir(), "config.srcDir");
     }
 
-    public void generate(String sql) throws IOException {
-        List<TableCommonDef> tableDefs = InternalUtil.parseCreateTable(sql);
-        generate(tableDefs);
-    }
+    @Override
+    public void generate(TableDef table) throws IOException {
+        String tableName = table.getTableName();
 
-    public void generate(String jdbcUrl, String jdbcUser, String jdbcPassword) throws SQLException, IOException {
-        try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)) {
-            generate(connection);
-        }
-    }
-
-    public void generate(Connection connection) throws SQLException, IOException {
-        List<TableCommonDef> tableDefs = InternalUtil.fetchTableDefs(connection);
-        generate(tableDefs);
-    }
-
-    public void generate(List<TableCommonDef> tableDefs) throws IOException {
-        for (TableCommonDef tableDef : tableDefs) {
-            generate(tableDef);
-        }
-    }
-
-    public void generate(TableCommonDef tableDef) throws IOException {
-        EntityDef entityDef = new EntityDef(tableDef, config);
         String srcDir = config.getSrcDir();
         boolean overwrite = config.isOverwrite();
         List<String> removedSqlMethods = null;
@@ -72,10 +50,10 @@ public class MyBatisGenerator {
         if (!mapperDir.exists() && !mapperDir.mkdirs()) {
             log.error("fail to create dir {} for java-mapper", mapperDir);
         } else {
-            JavaMapperTemplate javaMapperTemplate = new JavaMapperTemplate(entityDef, config);
+            JavaMapperTemplate javaMapperTemplate = new JavaMapperTemplate(table, config);
 
-            String javaMapperName = entityDef.getMapperName() + ".java";
-            File javaMapperFile = javaMapperTemplate.write(mapperDir, javaMapperName, overwrite);
+            String javaMapperName = config.formatMapperName(tableName) + ".java";
+            File javaMapperFile = javaMapperTemplate.writeDefault(mapperDir, javaMapperName, overwrite);
             InternalUtil.pruneJavaIfNeed(javaMapperFile, removedSqlMethods);
 
             // java-extends-mapper
@@ -84,15 +62,15 @@ public class MyBatisGenerator {
                 if (!extendsMapperDir.exists() && !extendsMapperDir.mkdirs()) {
                     log.error("fail to create dir {} for java-extends-mapper", extendsMapperDir);
                 } else {
-                    String javaExtendsMapperName = entityDef.getExtendsMapperName() + ".java";
+                    String javaExtendsMapperName = config.formatExtendsMapperName(tableName) + ".java";
                     javaMapperTemplate.writeSub(extendsMapperDir, javaExtendsMapperName, overwrite);
                 }
             }
         }
 
         // sql-mapper
-        String sqlMapperName = entityDef.getMapperName() + ".xml";
-        SqlMapperTemplate sqlMapperTemplate = new SqlMapperTemplate(entityDef, config);
+        String sqlMapperName = config.formatMapperName(tableName) + ".xml";
+        SqlMapperTemplate sqlMapperTemplate = new SqlMapperTemplate(table, config);
         File sqlMapperDir;
         if (config.getSqlMapperDir() != null) {
             sqlMapperDir = new File(config.getSqlMapperDir());
@@ -100,7 +78,7 @@ public class MyBatisGenerator {
             // put mappers together
             sqlMapperDir = mapperDir;
         }
-        File sqlMapperFile = sqlMapperTemplate.write(sqlMapperDir, sqlMapperName, overwrite);
+        File sqlMapperFile = sqlMapperTemplate.writeDefault(sqlMapperDir, sqlMapperName, overwrite);
         InternalUtil.pruneXmlIfNeed(sqlMapperFile, removedSqlMethods);
         // sql-extends-mapper
         if (config.isEnableExtendsMapper()) {
@@ -113,7 +91,7 @@ public class MyBatisGenerator {
             if (!extendsSqlMapperDir.exists() && !extendsSqlMapperDir.mkdirs()) {
                 log.error("fail to create dir {} for sql-extends-mapper", extendsSqlMapperDir);
             } else {
-                String javaExtendsMapperName = entityDef.getExtendsMapperName() + ".xml";
+                String javaExtendsMapperName = config.formatExtendsMapperName(tableName) + ".xml";
                 sqlMapperTemplate.writeSub(extendsSqlMapperDir, javaExtendsMapperName, overwrite);
             }
         }
@@ -123,9 +101,9 @@ public class MyBatisGenerator {
         if (!entityDir.exists() && !entityDir.mkdirs()) {
             log.info("fail to create dir {}", entityDir);
         } else {
-            String javaEntityName = entityDef.getEntityName() + ".java";
-            JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate(entityDef, config);
-            javaEntityTemplate.write(entityDir, javaEntityName, overwrite);
+            String javaEntityName = config.formatEntityName(tableName) + ".java";
+            JavaEntityTemplate javaEntityTemplate = new JavaEntityTemplate(table, config);
+            javaEntityTemplate.writeDefault(entityDir, javaEntityName, overwrite);
         }
 
         // java-condition
@@ -133,9 +111,9 @@ public class MyBatisGenerator {
         if (!conditionDir.exists() && !conditionDir.mkdirs()) {
             log.info("fail to create dir {}", conditionDir);
         } else {
-            String conditionName = entityDef.getConditionName() + ".java";
-            JavaConditionTemplate javaConditionTemplate = new JavaConditionTemplate(entityDef, config);
-            javaConditionTemplate.write(conditionDir, conditionName, overwrite);
+            String conditionName = config.formatConditionName(tableName) + ".java";
+            JavaConditionTemplate javaConditionTemplate = new JavaConditionTemplate(table, config);
+            javaConditionTemplate.writeDefault(conditionDir, conditionName, overwrite);
         }
     }
 }

@@ -1,0 +1,7 @@
+{
+  "outputDir": "build/cli/generated/fastapi-curd",
+  "overwrite": true,
+  "addComments": true,
+  "preferCamelCase": true,
+  "disableScript": true
+}

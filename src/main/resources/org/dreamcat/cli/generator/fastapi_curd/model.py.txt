@@ -1,0 +1,24 @@
+from datetime import datetime
+from typing import Optional
+
+from pydantic import Field
+from corepy.model import BaseCamelModel
+
+class ${model_name}SimplePublic(BaseCamelModel):
+
+${simple_get_field_declare_list}
+
+
+class ${model_name}Public(${model_name}SimplePublic):
+
+${get_field_declare_list}
+
+
+class ${model_name}Create(BaseCamelModel):
+
+${create_field_declare_list}
+
+
+class ${model_name}Update(${model_name}Create):
+
+${update_field_declare_list}

@@ -3,6 +3,7 @@ package org.dreamcat.cli.generator.mybatis;
 import lombok.SneakyThrows;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.dreamcat.cli.generator.base.InternalUtil;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig.StatementType;
 import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig.TableConfig;
 import org.dreamcat.cli.generator.mybatis.MybatisGeneratorMojo.Table;

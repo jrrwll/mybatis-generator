@@ -19,12 +19,14 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.dreamcat.common.util.ClassLoaderUtil;
 import org.dreamcat.common.util.DateUtil;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author Jerry Will
  * @version 2022-07-13
  */
+@Tag("integration")
 class ExampleTest {
 
     Class<?> liveRoomClass = forName("com.example.entity.LiveRoom");

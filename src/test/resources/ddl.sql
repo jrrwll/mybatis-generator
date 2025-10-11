@@ -15,3 +15,14 @@ create table way_bill (
     created_at  datetime not null default current_timestamp,
     primary key (`way_bill_id`)
 ) comment = 'a waybill record';
+
+create table shop (
+    id         bigint      not null auto_increment,
+    created_at datetime    not null default current_timestamp,
+    updated_at datetime    not null default current_timestamp on update current_timestamp,
+    deleted    tinyint(1)  not null default 0,
+    name       varchar(30) not null,
+    pic        text        not null,
+    min_fee    int         not null,
+    primary key (id)
+) charset utf8mb4;

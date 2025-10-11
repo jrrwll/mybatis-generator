@@ -6,32 +6,29 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
-import org.dreamcat.common.text.InterpolationUtil;
+import lombok.Setter;
+import org.dreamcat.cli.generator.base.SqlBasedGeneratorConfig;
+import org.dreamcat.common.util.ObjectUtil;
 import org.dreamcat.common.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
  * @author Jerry Will
  * @version 2021-12-07
  */
-@Data
+@Getter
+@Setter
 @JsonInclude(Include.NON_EMPTY)
-public class MyBatisGeneratorConfig {
+public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
 
     private static final String default_mapper_package_name = "com.example.mapper.base";
     private static final String default_extends_mapper_package_name = "com.example.mapper";
-    private static final String default_mapper_name = "${prefix}${name}${suffix}BaseMapper";
-    private static final String default_extends_mapper_name = "${prefix}${name}${suffix}Mapper";
 
-    private boolean overwrite;
     private String srcDir; // location of mapper.java and entity.java
     private String sqlMapperDir; // location of mapper.xml, null means mapperPackageName
     private String extendsSqlMapperDir; // location of extends mapper.xml, null means extendsMapperPackageName
@@ -43,28 +40,25 @@ public class MyBatisGeneratorConfig {
     @Getter(AccessLevel.NONE)
     private String conditionPackageName; // default is entityPackageName + ".condition";
 
-    private Set<String> ignoreColumns = new HashSet<>();
-    private boolean forceInt = true; // force use int for tinyint and smallint
-    private boolean forceDecimal; // force use BigDecimal for float numbers
     private boolean enableResultMapWithBLOBs;
     private boolean enableExtendsMapper; // gen Mapper extends BaseMapper
     private boolean addMapperAnnotation; // @Mapper
+    private boolean enableGeneratedKeys; // use generatedKeys
     private boolean enableLombok = true; // @Data
-    private boolean addComments = false;
     private Character delimitKeyword; // ` or "
 
     @JsonIgnore
     private UnaryOperator<String> nameWrapper = StringUtil::toCapitalCamelCase;
-    @JsonIgnore
-    private UnaryOperator<String> propertyNameWrapper = StringUtil::toCamelCase;
-    private String namePrefix = "";
-    private String nameSuffix = "";
-    private String entityName = "${prefix}${name}${suffix}";
-    @Getter(AccessLevel.NONE)
-    private String mapperName;
-    private String extendsMapperName = default_extends_mapper_name;
-    private String conditionName = "${prefix}${name}${suffix}Condition";
-    private String propertyName = "${name}";
+
+    private String entityNamePrefix = "";
+    private String entityNameSuffix = "";
+    private String mapperNamePrefix;
+    private String mapperNameSuffix; // BaseMapper
+    private String extendsMapperNamePrefix = "";
+    private String extendsMapperNameSuffix = "Mapper";
+    private String conditionNamePrefix = "";
+    private String conditionNameSuffix = "Condition";
+
     private Map<String, TableConfig> tableConfigs = new HashMap<>();
 
     // statements which need be pruned
@@ -90,56 +84,43 @@ public class MyBatisGeneratorConfig {
         return entityPackageName + ".condition";
     }
 
-    public String getMapperName() {
-        if (mapperName != null) return mapperName;
-        if (enableExtendsMapper) {
-            return default_mapper_name;
-        } else {
-            return default_extends_mapper_name;
-        }
-    }
-
     public String formatEntityName(String tableName) {
-        return formatTableName(tableName, entityName, TableConfig::getEntityName);
+        String name = formatName(tableName, tableConfigs::get, TableConfig::getEntityName);
+        return entityNamePrefix + name + entityNameSuffix;
     }
 
     public String formatMapperName(String tableName) {
-
-        return formatTableName(tableName, getMapperName(), TableConfig::getMapperName);
+        String name = formatName(tableName, tableConfigs::get, TableConfig::getMapperName);
+        if (ObjectUtil.isNotBlank(mapperNamePrefix) || ObjectUtil.isNotBlank(mapperNameSuffix)) {
+            return mapperNamePrefix + name + mapperNameSuffix;
+        } else if (enableExtendsMapper) {
+            return name + "BaseMapper";
+        } else {
+            return name + "Mapper";
+        }
     }
 
     public String formatExtendsMapperName(String tableName) {
-        return formatTableName(tableName, extendsMapperName, TableConfig::getExtendsMapperName);
+        String name = formatName(tableName, tableConfigs::get, TableConfig::getExtendsMapperName);
+        return extendsMapperNamePrefix + name + extendsMapperNameSuffix;
     }
 
     public String formatConditionName(String tableName) {
-        return formatTableName(tableName, conditionName, TableConfig::getConditionName);
+        String name = formatName(tableName, tableConfigs::get, TableConfig::getConditionName);
+        return conditionNamePrefix + name + conditionNameSuffix;
     }
 
-    private String formatTableName(String tableName, String nameFormat, Function<TableConfig, String> nameGetter) {
-        TableConfig tableConfig = tableConfigs.get(tableName);
-        if (tableConfig != null) {
-            String name = nameGetter.apply(tableConfig);
-            if (name != null) {
-                return name;
-            }
+    public String formatSqlName(String tableOrColumnName) {
+        if (delimitKeyword == null) {
+            return tableOrColumnName;
         }
-        String name = nameWrapper.apply(tableName);
-        return InterpolationUtil.format(nameFormat, "name", name,
-                "prefix", namePrefix,
-                "suffix", nameSuffix);
+        return delimitKeyword + tableOrColumnName + delimitKeyword;
     }
 
     public String formatPropertyName(String columnName, String tableName) {
-        TableConfig tableConfig = tableConfigs.get(tableName);
-        if (tableConfig != null) {
-            String name = tableConfig.getPropertyNames().get(columnName);
-            if (name != null) {
-                return name;
-            }
-        }
-        String name = propertyNameWrapper.apply(columnName);
-        return InterpolationUtil.format(propertyName, "name", name);
+        return formatPropertyName(columnName, tableName, tableConfigs::get,
+                c -> c.getPropertyNames().get(columnName),
+                StringUtil::toCamelCase);
     }
 
     @Data
