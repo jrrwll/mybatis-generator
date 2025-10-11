@@ -32,10 +32,10 @@ jobs:
             platform: macos-aarch64
             artifact_name: macos-aarch64
             native_dir: build/native/nativeCompile
-          - os: windows-latest
-            platform: windows
-            artifact_name: windows-amd64
-            native_dir: build/native/nativeCompile
+          #- os: windows-latest
+          #  platform: windows
+          #  artifact_name: windows-amd64
+          #  native_dir: build/native/nativeCompile
 
     steps:
       - name: Checkout Code
@@ -112,7 +112,7 @@ jobs:
         run: |
           mkdir -p final-release
 
-          for platform in linux-amd64 macos-amd64 macos-aarch64 windows-amd64; do
+          for platform in linux-amd64 macos-amd64 macos-aarch64; do
             if [ -d "release-artifacts/$platform" ]; then
               mkdir -p "final-release/$platform"
               cp -r "release-artifacts/$platform"/* "final-release/$platform/" 2>/dev/null || true
@@ -137,7 +137,6 @@ jobs:
             - Linux (x86_64)
             - macOS (x86_64)
             - macOS (ARM64) 
-            - Windows (x86_64)
 
             ## Download
             Download the compressed package for the corresponding platform, decompress it and use it.
@@ -153,9 +152,6 @@ jobs:
 
             # macOS Apple Silicon
             sha256sum macos-aarch64.tar.gz
-
-            # Windows
-            sha256sum windows-amd64.tar.gz
             ```
           draft: false
           prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
