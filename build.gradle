@@ -30,6 +30,7 @@ allprojects {
         testAnnotationProcessor libs.lombok
         testImplementation libs.jupiter.api
         testRuntimeOnly libs.jupiter.engine
+        testRuntimeOnly libs.junit.platform.launcher
     }
 
     test {

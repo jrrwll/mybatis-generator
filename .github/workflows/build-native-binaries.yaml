@@ -22,30 +22,45 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            artifact_name: linux-amd64
-            native_dir: build/native
+            arch: amd64
+            artifact_name: code-generator_linux_amd64
+            native_dir: build/native/nativeCompile
+          - os: ubuntu-latest
+            platform: linux
+            arch: aarch64
+            artifact_name: code-generator_linux_aarch64
+            native_dir: build/native/nativeCompile
+          - os: macos-13
+            platform: macos
+            arch: amd64
+            artifact_name: code-generator_macos_amd64
+            native_dir: build/native/nativeCompile
           - os: macos-latest
             platform: macos
-            artifact_name: macos-amd64
-            native_dir: build/native
-          - os: macos-latest
-            platform: macos-aarch64
-            artifact_name: macos-aarch64
-            native_dir: build/native
+            arch: aarch64
+            artifact_name: code-generator_macos_aarch64
+            native_dir: build/native/nativeCompile
           - os: windows-latest
             platform: windows
-            artifact_name: windows-amd64
-            native_dir: build/native
+            arch: amd64
+            artifact_name: code-generator_windows_amd64
+            native_dir: build/native/nativeCompile
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup JDK
-        uses: actions/setup-java@v4
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
         with:
           java-version: '21'
-          distribution: 'temurin'
+          distribution: 'graalvm'
+
+      - name: Install musl-tools for static linking (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+        if: matrix.platform == 'linux' && matrix.arch == 'amd64'
 
       # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
       # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
@@ -62,32 +77,50 @@ jobs:
         run: ./gradlew :test --info --stacktrace
 
       - name: Native Compile with Gradle
-        run: ./gradlew :nativeCompile --info --stacktrace
+        run: |
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            if [ "${{ matrix.arch }}" = "amd64" ]; then
+              export GRAALVM_NATIVE_IMAGE_OPTS="-H:Name=code-generator --static --libc=musl -H:+ReportExceptionStackTraces"
+            else
+              export GRAALVM_NATIVE_IMAGE_OPTS="-H:Name=code-generator --static -H:+ReportExceptionStackTraces"
+            fi
+          elif [ "${{ matrix.platform }}" = "macos" ]; then
+            if [ "${{ matrix.arch }}" = "amd64" ]; then
+              export GRAALVM_NATIVE_IMAGE_OPTS="-H:Name=code-generator -H:+ReportExceptionStackTraces"
+            else
+              export GRAALVM_NATIVE_IMAGE_OPTS="-H:Name=code-generator -H:+ReportExceptionStackTraces"
+            fi
+          elif [ "${{ matrix.platform }}" = "windows" ]; then
+            echo "Building for Windows"
+          fi
+          ./gradlew :nativeCompile --info --stacktrace
 
       - name: Package artifacts
         shell: bash
         run: |
-            mkdir -p dist
-            
-            if [ -d "${{ matrix.native_dir }}" ]; then
-              echo "Copying files from ${{ matrix.native_dir }}"
-              cp -r ${{ matrix.native_dir }}/* dist/ 2>/dev/null || true
-            fi
+          mkdir -p dist
 
-            find build -type f -executable -exec cp {} dist/ \; 2>/dev/null || true
-            find build -name "*.exe" -exec cp {} dist/ \; 2>/dev/null || true
-            find build -name "*.dll" -exec cp {} dist/ \; 2>/dev/null || true
-            find build -name "*.so" -exec cp {} dist/ \; 2>/dev/null || true
-            find build -name "*.dylib" -exec cp {} dist/ \; 2>/dev/null || true
-            
-            echo "Version: ${{ github.ref_name }}" > dist/version.txt
-            echo "Platform: ${{ matrix.platform }}" >> dist/version.txt
-            echo "Build Date: $(date -u)" >> dist/version.txt
-            echo "Commit: ${{ github.sha }}" >> dist/version.txt
+          if [ -d "${{ matrix.native_dir }}" ]; then
+            echo "Copying files from ${{ matrix.native_dir }}"
+            cp -r ${{ matrix.native_dir }}/* dist/ 2>/dev/null || true
+          fi
 
-            echo "Packaged files:"
-            ls -la dist/
-          
+          find build -type f -executable -exec cp {} dist/ \; 2>/dev/null || true
+          find build -name "*.exe" -exec cp {} dist/ \; 2>/dev/null || true
+          find build -name "*.dll" -exec cp {} dist/ \; 2>/dev/null || true
+          find build -name "*.so" -exec cp {} dist/ \; 2>/dev/null || true
+          find build -name "*.dylib" -exec cp {} dist/ \; 2>/dev/null || true
+
+          # Rename executable to code-generator
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            find dist -name "*.exe" -exec basename {} .exe \; | head -1 | xargs -I {} mv "dist/{}.exe" "dist/code-generator.exe" 2>/dev/null || true
+          else
+            find dist -type f -executable ! -name "*.sh" -exec basename {} \; | head -1 | xargs -I {} mv "dist/{}" "dist/code-generator" 2>/dev/null || true
+          fi
+
+          echo "Packaged files:"
+          ls -la dist/
+
       - name: Upload platform artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -98,6 +131,8 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs: build-native
     if: success() && startsWith(github.ref, 'refs/tags/')
 
@@ -107,19 +142,49 @@ jobs:
         with:
           path: release-artifacts
 
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Prepare release assets
         shell: bash
         run: |
           mkdir -p final-release
 
-          for platform in linux-amd64 macos-amd64 macos-aarch64 windows-amd64; do
-            if [ -d "release-artifacts/$platform" ]; then
-              mkdir -p "final-release/$platform"
-              cp -r "release-artifacts/$platform"/* "final-release/$platform/" 2>/dev/null || true
+          for platform_dir in release-artifacts/*; do
+            if [ -d "$platform_dir" ]; then
+              platform=$(basename "$platform_dir")
 
-              cd "final-release/$platform"
-              tar -czf "../$platform.tar.gz" . 2>/dev/null || true
-              cd ../..
+              # Determine the platform string for filename
+              if [[ "$platform" == *"linux"* && "$platform" == *"amd64"* ]]; then
+                platform_str="linux_amd64"
+              elif [[ "$platform" == *"linux"* && "$platform" == *"aarch64"* ]]; then
+                platform_str="linux_aarch64"
+              elif [[ "$platform" == *"macos"* && "$platform" == *"amd64"* ]]; then
+                platform_str="mac_amd64"
+              elif [[ "$platform" == *"macos"* && "$platform" == *"aarch64"* ]]; then
+                platform_str="mac_aarch64"
+              elif [[ "$platform" == *"windows"* && "$platform" == *"amd64"* ]]; then
+                platform_str="windows_amd64"
+              else
+                continue
+              fi
+
+              mkdir -p "temp_package"
+              cp -r "$platform_dir"/* "temp_package/" 2>/dev/null || true
+
+              cd "temp_package"
+              chmod +x code-generator 2>/dev/null || true
+              chmod +x code-generator.exe 2>/dev/null || true
+
+              # Create versioned archive
+              if [[ "$platform" == *"windows"* ]]; then
+                zip -r "../final-release/code-generator_${VERSION}_${platform_str}.zip" . 2>/dev/null || true
+              else
+                tar -czf "../final-release/code-generator_${VERSION}_${platform_str}.tar.gz" . 2>/dev/null || true
+              fi
+
+              cd ..
+              rm -rf temp_package
             fi
           done
 
@@ -146,16 +211,16 @@ jobs:
             SHA256 checksums:
             ```bash
             # Linux
-            sha256sum linux-amd64.tar.gz
+            sha256sum code-generator_linux_amd64.tar.gz
 
             # macOS Intel
-            sha256sum macos-amd64.tar.gz
+            sha256sum code-generator_macos_amd64.tar.gz
 
             # macOS Apple Silicon
-            sha256sum macos-aarch64.tar.gz
-
+            sha256sum code-generator_macos_aarch64.tar.gz
+            
             # Windows
-            sha256sum windows-amd64.tar.gz
+            sha256sum code-generator_windows_amd64.tar.gz
             ```
           draft: false
           prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}

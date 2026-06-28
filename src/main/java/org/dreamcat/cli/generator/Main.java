@@ -17,7 +17,7 @@ import org.dreamcat.common.argparse.ArgParserContext;
 import org.dreamcat.common.argparse.ArgParserEntrypoint;
 import org.dreamcat.common.argparse.ArgParserField;
 import org.dreamcat.common.argparse.ArgParserType;
-import org.dreamcat.common.argparse.SubcommandArgParser;
+import org.dreamcat.common.argparse.CommandArgParser;
 import org.dreamcat.common.io.FileUtil;
 import org.dreamcat.common.json.JsonUtil;
 import org.dreamcat.common.reflect.ObjectType;
@@ -38,8 +38,7 @@ import java.io.File;
 public class Main implements ArgParserEntrypoint {
 
     public static void main(String[] args) {
-        SubcommandArgParser argParser = new SubcommandArgParser(Main.class);
-        argParser.run(args);
+        CommandArgParser.run(Main.class, args);
     }
 
     @ArgParserField(firstChar = true, helpDesc = "print the help info")

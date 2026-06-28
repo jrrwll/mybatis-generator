@@ -75,7 +75,7 @@ public class MybatisGeneratorTask extends DefaultTask {
         if (sqlPath.startsWith("/")) {
             sqlPathFile = new File(sqlPath).getCanonicalFile();
         } else {
-            sqlPathFile = new File(getProject().getRootDir(), sqlPath).getCanonicalFile();
+            sqlPathFile = new File(getProject().getProjectDir(), sqlPath).getCanonicalFile();
         }
         getLogger().quiet("resolved sqlPath: {}", sqlPathFile);
         List<Pair<String, File>> sqls = getSql(sqlPathFile);
