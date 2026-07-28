@@ -164,9 +164,14 @@ $update_if_test_column_value_list
     update $table_name
     set
     $update_by_column_value_list
-    <if test="condition != null">
-      <include refid="update_where_criteria"/>
-    </if>
+    <choose>
+      <when test="condition != null">
+        <include refid="update_where_criteria"/>
+      </when>
+      <otherwise>
+        where 1 = 0
+      </otherwise>
+    </choose>
   </update>
 
   <update id="updateSelective">
@@ -174,9 +179,14 @@ $update_if_test_column_value_list
     <set>
 $update_by_if_test_column_value_list
     </set>
-    <if test="condition != null">
-      <include refid="update_where_criteria"/>
-    </if>
+    <choose>
+      <when test="condition != null">
+        <include refid="update_where_criteria"/>
+      </when>
+      <otherwise>
+        where 1 = 0
+      </otherwise>
+    </choose>
   </update>
 
 </mapper>

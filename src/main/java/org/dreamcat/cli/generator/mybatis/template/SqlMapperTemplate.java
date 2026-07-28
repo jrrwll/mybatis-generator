@@ -135,16 +135,16 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
         this.update_column_value_list = table.getNotPrimaryKeyColumns().stream()
                 .map(this::formatColumnEq)
                 .collect(Collectors.joining("\n    , "));
-        this.update_by_column_value_list = table.getColumns().values().stream()
+        this.update_by_column_value_list = table.getNotPrimaryKeyColumns().stream()
                 .map(this::formatColumnEqBy)
                 .collect(Collectors.joining("\n    , "));
 
         this.update_if_test_column_value_list = table.getNotPrimaryKeyColumns().stream()
                 .map(this::formatUpdateIfTestColumnValue)
-                .collect(Collectors.joining("\n      ,\n"));
+                .collect(Collectors.joining("\n"));
         this.update_by_if_test_column_value_list = table.getNotPrimaryKeyColumns().stream()
                 .map(this::formatUpdateByIfTestColumnValue)
-                .collect(Collectors.joining("\n      ,\n"));
+                .collect(Collectors.joining("\n"));
 
         boolean needBlob = config.isEnableResultMapWithBLOBs() && table.hasBlobColumns();
         if (needBlob) {
@@ -279,10 +279,10 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
     static final String _column_eq_by = "$column = #{entity.$property,jdbcType=$type}";
 
     static final String _update_if_test_column_value = "      <if test=\"$property != null\">\n"
-            + "        $column = #{$property,jdbcType=$type}\n"
+            + "        $column = #{$property,jdbcType=$type},\n"
             + "      </if>";
     static final String _update_by_if_test_column_value = "      <if test=\"entity.$property != null\">\n"
-            + "        $column = #{entity.$property,jdbcType=$type}\n"
+            + "        $column = #{entity.$property,jdbcType=$type},\n"
             + "      </if>";
 
     static final String _result_map_with_blobs =
