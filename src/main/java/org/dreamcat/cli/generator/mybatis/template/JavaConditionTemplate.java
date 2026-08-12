@@ -91,6 +91,7 @@ public class JavaConditionTemplate extends MybatisTemplateOutput {
 
     private static final String _all;
     private static final String _criteria_method;
+    private static final String _criteria_method_cmp;
     private static final String _criteria_method_list;
     private static final String _criteria_method_str;
     private static final String _criteria_method_void;
@@ -98,6 +99,7 @@ public class JavaConditionTemplate extends MybatisTemplateOutput {
     static {
         _all = getResourceAsString("Condition.java");
         _criteria_method = getResourceAsString("criteria_method.txt");
+        _criteria_method_cmp = getResourceAsString("criteria_method_cmp.txt");
         _criteria_method_list = getResourceAsString("criteria_method_list.txt");
         _criteria_method_str = getResourceAsString("criteria_method_str.txt");
         _criteria_method_void = getResourceAsString("criteria_method_void.txt");
