@@ -120,7 +120,7 @@ public class JavaMapperTemplate extends MybatisTemplateOutput {
     static final String _select_by_primary_key_with_blobs =
             "\n    $entity_type selectByPrimaryKeyWithBLOBs($primary_key_declare_list);\n";
     static final String _select_with_blobs =
-            "\n    List<$entity_type> selectWithBLOBs($condition_type condition);\n";
+            "\n    List<$entity_type> selectWithBLOBs(@Param(\"condition\") $condition_type condition);\n";
 
     static final String _all;
     static final String _all_sub;

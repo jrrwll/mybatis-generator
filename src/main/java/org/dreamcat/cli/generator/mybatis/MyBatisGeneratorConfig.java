@@ -43,7 +43,7 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
     private boolean enableResultMapWithBLOBs;
     private boolean enableExtendsMapper; // gen Mapper extends BaseMapper
     private boolean addMapperAnnotation; // @Mapper
-    private boolean enableGeneratedKeys; // use generatedKeys
+    private boolean enableGeneratedKeys = true; // use generatedKeys
     private boolean enableLombok = true; // @Data
     private Character delimitKeyword; // ` or "
 
@@ -123,6 +123,11 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
                 StringUtil::toCamelCase);
     }
 
+    public boolean isTableGeneratedKeys(String tableName) {
+        TableConfig tableConfig = tableConfigs.get(tableName);
+        return tableConfig != null && tableConfig.isGeneratedKeys();
+    }
+
     @Data
     @JsonInclude(Include.NON_EMPTY)
     public static class TableConfig {
@@ -131,6 +136,7 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
         private String mapperName;
         private String extendsMapperName;
         private String conditionName;
+        private boolean generatedKeys;
 
         private Map<String, String> propertyNames = new HashMap<>();
     }

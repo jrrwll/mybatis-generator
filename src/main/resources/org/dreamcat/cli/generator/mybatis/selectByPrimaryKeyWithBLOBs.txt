@@ -3,7 +3,6 @@
     select
     <include refid="base_column_list"/>,
     <include refid="blob_column_list"/>
-    from
-    <include refid="table_name"/>
+    from $table_name
     where $primary_key_eq_list
   </select>

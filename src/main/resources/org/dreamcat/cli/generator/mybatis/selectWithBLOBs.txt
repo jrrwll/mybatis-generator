@@ -3,13 +3,12 @@
     select
     <include refid="base_column_list"/>,
     <include refid="blob_column_list"/>
-    from
-    <include refid="table_name"/>
+    from $table_name
     <if test="_parameter != null">
       <include refid="where_criteria"/>
     </if>
     <if test="orderBy != null">
-      order by #{orderBy}
+      order by ${orderBy}
     </if>
     <if test="limit != 0">
       limit #{limit} offset #{offset}

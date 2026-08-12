@@ -107,12 +107,17 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                 .map(c -> config.formatSqlName(c.getColumnName()))
                 .collect(Collectors.joining(", "));
 
+        // generated key is only supported for one primary key
         if (config.isEnableGeneratedKeys() && table.getPrimaryKeyColumns().size() == 1) {
-            String column = table.getPrimaryKeyColumns().get(0).getColumnName();
-            String property = this.propertyFormatter.apply(column);
-            this.insert_generated_key = InterpolationUtil.format(_insert_generated_key,
-                    "property", property,
-                    "column", column);
+            ColumnDef columnDef = table.getPrimaryKeyColumns().get(0);
+            boolean generatedKey = config.isTableGeneratedKeys(tableName);
+            if (generatedKey || columnDef.isAutoIncrement()) {
+                String column = columnDef.getColumnName();
+                String property = this.propertyFormatter.apply(column);
+                this.insert_generated_key = InterpolationUtil.format(_insert_generated_key,
+                        "property", property,
+                        "column", column);
+            }
         }
         this.insert_column_value_list = table.getNotIgnoredColumns().values().stream()
                 .map(this::formatInsertColumnValue)
@@ -163,8 +168,9 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                             .collect(Collectors.joining(", ")));
 
             this.select_by_primary_key_with_blobs = InterpolationUtil.format(_select_by_primary_key_with_blobs,
-                    "primary_key_eq_list", primary_key_eq_list);
-            this.select_with_blobs = _select_with_blobs;
+                    "primary_key_eq_list", primary_key_eq_list, "table_name", table_name);
+            this.select_with_blobs = InterpolationUtil.format(
+                    _select_with_blobs, "table_name", table_name);
         }
 
         if (config.isEnableExtendsMapper()) {

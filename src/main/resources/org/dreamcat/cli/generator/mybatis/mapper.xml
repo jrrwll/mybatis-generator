@@ -13,36 +13,6 @@ $result_map_with_blobs
 $blob_column_list
   <sql id="where_criteria">
     <where>
-      <foreach collection="criteriaList" item="criteria" separator="or">
-        <if test="criteria.valid">
-          <trim prefix="(" prefixOverrides="and" suffix=")">
-            <foreach collection="criteria.criteria" item="criterion">
-              <choose>
-                <when test="criterion.noValue">
-                  and ${criterion.condition}
-                </when>
-                <when test="criterion.singleValue">
-                  and ${criterion.condition} #{criterion.value}
-                </when>
-                <when test="criterion.betweenValue">
-                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
-                </when>
-                <when test="criterion.listValue">
-                  and ${criterion.condition}
-                  <foreach open="(" close=")" collection="criterion.value" item="listItem" separator=",">
-                    #{listItem}
-                  </foreach>
-                </when>
-              </choose>
-            </foreach>
-          </trim>
-        </if>
-      </foreach>
-    </where>
-  </sql>
-
-  <sql id="update_where_criteria">
-    <where>
       <foreach collection="condition.criteriaList" item="criteria" separator="or">
         <if test="criteria.valid">
           <trim prefix="(" prefixOverrides="and" suffix=")">
@@ -109,11 +79,16 @@ $if_test_column_value_list
 
   <delete id="delete">
     delete from $table_name
-    <if test="_parameter != null">
-      <include refid="where_criteria"/>
-    </if>
-    <if test="limit != 0">
-      limit #{limit}
+    <choose>
+      <when test="condition != null and condition.hasCriteria">
+        <include refid="where_criteria"/>
+      </when>
+      <otherwise>
+        where 1 = 0
+      </otherwise>
+    </choose>
+    <if test="condition != null and condition.limit != null">
+      limit #{condition.limit}
     </if>
   </delete>
 
@@ -128,22 +103,32 @@ $select_by_primary_key_with_blobs
     select
     <include refid="base_column_list"/>
     from $table_name
-    <if test="_parameter != null">
-      <include refid="where_criteria"/>
+    <choose>
+      <when test="condition != null and condition.hasCriteria">
+        <include refid="where_criteria"/>
+      </when>
+      <otherwise>
+        where 1 = 0
+      </otherwise>
+    </choose>
+    <if test="condition != null and condition.orderBy != null">
+      order by ${condition.orderBy}
     </if>
-    <if test="orderBy != null">
-      order by #{orderBy}
-    </if>
-    <if test="limit != 0">
-      limit #{limit} offset #{offset}
+    <if test="condition != null and condition.limit != null">
+      limit #{condition.limit} offset #{condition.offset}
     </if>
   </select>
 $select_with_blobs
   <select id="count" resultType="java.lang.Long">
     select count(*) from $table_name
-    <if test="_parameter != null">
-      <include refid="where_criteria"/>
-    </if>
+    <choose>
+      <when test="condition != null and condition.hasCriteria">
+        <include refid="where_criteria"/>
+      </when>
+      <otherwise>
+        where 1 = 0
+      </otherwise>
+    </choose>
   </select>
 
   <update id="updateByPrimaryKey" parameterType="$result_map">
@@ -165,8 +150,8 @@ $update_if_test_column_value_list
     set
     $update_by_column_value_list
     <choose>
-      <when test="condition != null">
-        <include refid="update_where_criteria"/>
+      <when test="condition != null and condition.hasCriteria">
+        <include refid="where_criteria"/>
       </when>
       <otherwise>
         where 1 = 0
@@ -180,8 +165,8 @@ $update_if_test_column_value_list
 $update_by_if_test_column_value_list
     </set>
     <choose>
-      <when test="condition != null">
-        <include refid="update_where_criteria"/>
+      <when test="condition != null and condition.hasCriteria">
+        <include refid="where_criteria"/>
       </when>
       <otherwise>
         where 1 = 0

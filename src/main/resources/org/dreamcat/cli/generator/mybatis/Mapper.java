@@ -21,13 +21,13 @@ public interface $mapper_type {
 
     int deleteByPrimaryKey($primary_key_declare_list);
 
-    int delete($condition_type condition);
+    int delete(@Param("condition") $condition_type condition);
 
     $entity_type selectByPrimaryKey($primary_key_declare_list);
 $select_by_primary_key_with_blobs
-    List<$entity_type> select($condition_type condition);
+    List<$entity_type> select(@Param("condition") $condition_type condition);
 $select_with_blobs
-    long count($condition_type condition);
+    long count(@Param("condition") $condition_type condition);
 
     int updateByPrimaryKey($entity_type entity);
 

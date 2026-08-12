@@ -83,8 +83,8 @@ public class InternalUtil {
 
             List<String> columnSpecs = columnDefinition.getColumnSpecs();
             columnDef.setComment(findComment(columnSpecs));
-
             columnDef.setNotNull(findNotNull(columnSpecs));
+            columnDef.setAutoIncrement(findAutoIncrement(columnSpecs));
 
             tableCommonDef.getColumns().add(columnDef);
         }
@@ -140,6 +140,18 @@ public class InternalUtil {
                 if ("null".equalsIgnoreCase(nextValue)) {
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private static boolean findAutoIncrement(List<String> optionsStrings) {
+        if (ObjectUtil.isEmpty(optionsStrings)) {
+            return false;
+        }
+        for (String option : optionsStrings) {
+            if ("auto_increment".equalsIgnoreCase(option)) {
+                return true;
             }
         }
         return false;

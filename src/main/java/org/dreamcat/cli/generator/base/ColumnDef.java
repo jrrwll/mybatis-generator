@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Jerry Will
@@ -26,6 +27,7 @@ public class ColumnDef {
 
     private Integer typeLength;
     private boolean notNull;
+    private boolean autoIncrement;
 
     public ColumnDef(ColumnCommonDef column, SqlBasedGeneratorConfig config) {
         this.columnName = column.getName();
@@ -43,6 +45,8 @@ public class ColumnDef {
         if (ObjectUtil.isNotEmpty(column.getTypeParams())) {
             this.typeLength = column.getTypeParams().get(0);
         }
+
+        this.autoIncrement = Objects.equals(column.getAutoIncrement(), true);
     }
 
     public boolean isBlob() {

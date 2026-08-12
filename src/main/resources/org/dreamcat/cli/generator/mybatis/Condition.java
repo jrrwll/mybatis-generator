@@ -11,12 +11,20 @@ import java.util.*;
 public class $condition_type {
 
     protected String orderBy;
-    protected int limit;
+    protected Integer limit;
     protected int offset;
     protected List<Criteria> criteriaList;
 
     public $condition_type() {
         criteriaList = new ArrayList<>();
+    }
+
+    public $condition_type orderByDesc(Order order) {
+        return appendOrderBy(order, true);
+    }
+
+    public $condition_type orderByAsc(Order order) {
+        return appendOrderBy(order, false);
     }
 
     public $condition_type appendOrderBy(Order order, boolean desc) {
@@ -33,7 +41,7 @@ public class $condition_type {
         return orderBy;
     }
 
-    public int getLimit() {
+    public Integer getLimit() {
         return limit;
     }
 
@@ -50,31 +58,40 @@ public class $condition_type {
     }
 
     public List<Criteria> getCriteriaList() {
-        return criteriaList;
-    }
-
-    public void or(Criteria criteria) {
-        criteriaList.add(criteria);
-    }
-
-    public Criteria or() {
-        Criteria criteria = new Criteria();
-        criteriaList.add(criteria);
-        return criteria;
+        return Collections.unmodifiableList(criteriaList);
     }
 
     public Criteria createCriteria() {
-        Criteria criteria = new Criteria();
-        if (criteriaList.isEmpty()) {
-            criteriaList.add(criteria);
+        if (!criteriaList.isEmpty()) {
+            throw new IllegalStateException(
+                    "criteria already exists; use or() to create another group");
         }
+        Criteria criteria = new Criteria();
+        criteriaList.add(criteria);
         return criteria;
+    }
+
+    public Criteria or() {
+        return or(new Criteria());
+    }
+
+    public void or(Criteria criteria) {
+        if (criteriaList.isEmpty()) {
+            throw new IllegalStateException(
+                    "no criteria exists; call createCriteria() first");
+        }
+        criteriaList.add(Objects.requireNonNull(criteria, "criteria is null"));
+    }
+
+    public boolean hasCriteria() {
+        return criteriaList.stream().anyMatch(criteria -> criteria.isValid());
     }
 
     public void clear() {
         criteriaList.clear();
         orderBy = null;
-
+        limit = null;
+        offset = 0;
     }
 
     public static class Criteria {
@@ -86,7 +103,7 @@ public class $condition_type {
         }
 
         public List<Criterion> getCriteria() {
-            return criteria;
+            return Collections.unmodifiableList(criteria);
         }
 
         protected void addCriterion(String condition) {
@@ -117,8 +134,6 @@ $criteria_method_list
 
         private final String condition;
 
-        private final String typeHandler;
-
         private Object value;
 
         private Object secondValue;
@@ -133,10 +148,6 @@ $criteria_method_list
 
         public String getCondition() {
             return condition;
-        }
-
-        public String getTypeHandler() {
-            return typeHandler;
         }
 
         public Object getValue() {
@@ -165,35 +176,27 @@ $criteria_method_list
 
         protected Criterion(String condition) {
             this.condition = condition;
-            this.typeHandler = null;
             this.noValue = true;
         }
 
-        protected Criterion(String condition, Object value, String typeHandler) {
+        protected Criterion(String condition, Object value) {
             this.condition = condition;
             this.value = value;
-            this.typeHandler = typeHandler;
-            if (value instanceof List) {
+            if (value instanceof Collection) {
+                if ((Collection<?>) value).isEmpty()) {
+                    throw new IllegalArgumentException("empty values on `" + condition + "`");
+                }
                 this.listValue = true;
             } else {
                 this.singleValue = true;
             }
         }
 
-        protected Criterion(String condition, Object value) {
-            this(condition, value, null);
-        }
-
-        protected Criterion(String condition, Object value, Object secondValue, String typeHandler) {
+        protected Criterion(String condition, Object value, Object secondValue) {
             this.condition = condition;
             this.value = value;
             this.secondValue = secondValue;
-            this.typeHandler = typeHandler;
             this.betweenValue = true;
-        }
-
-        protected Criterion(String condition, Object value, Object secondValue) {
-            this(condition, value, secondValue, null);
         }
     }
 
