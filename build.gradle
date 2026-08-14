@@ -1,6 +1,6 @@
 plugins {
 // https://central.sonatype.com/artifact/org.graalvm.buildtools/native-gradle-plugin
-    id 'org.graalvm.buildtools.native' version '0.11.1'
+    id 'org.graalvm.buildtools.native' version '0.11.1' apply false
 }
 
 allprojects {
@@ -50,11 +50,11 @@ allprojects {
 
 dependencies {
     implementation libs.slf4j.api
-    implementation libs.slf4j.simple
     implementation libs.dreamcat.common
     implementation libs.bundles.jackson
     implementation libs.jsqlparser
 
+    testImplementation libs.slf4j.simple
     testImplementation 'org.mybatis:mybatis:3.5.10'
     // testRuntimeOnly 'mysql:mysql-connector-java:8.0.29'
     // https://mvnrepository.com/artifact/com.h2database/h2
@@ -63,19 +63,8 @@ dependencies {
 
 apply from: new File(rootDir, 'gradle/tasks-jar.gradle')
 
-
 processTestResources {
     from('src/test/java') {
         include '**/*.xml'
     }
 }
-
-jar {
-    manifest {
-        attributes(
-                "Main-Class": "org.dreamcat.cli.generator.Main",
-        )
-    }
-}
-
-apply from: new File(rootDir, 'gradle/native-image.gradle')

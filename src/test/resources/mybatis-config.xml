@@ -11,19 +11,22 @@ mybatis:
   <settings>
     <setting name="logImpl" value="STDOUT_LOGGING"/>
   </settings>
+
   <environments default="development">
     <environment id="development">
       <transactionManager type="JDBC"/>
       <!-- org.apache.ibatis.datasource.pooled.PooledDataSource -->
       <dataSource type="POOLED">
         <property name="driver" value="org.h2.Driver"/>
-        <property name="url" value="jdbc:h2:mem:testdb"/>
+        <property name="url" value="jdbc:h2:mem:testdb;mode=mysql"/>
       </dataSource>
     </environment>
   </environments>
 
   <mappers>
-    <mapper resource="com/example/mapper/LiveRoomMapper.xml"/>
-    <mapper resource="com/example/mapper/WayBillMapper.xml"/>
+    <package name="com.example.mapper"/>
+    <!--<package name="com.example.mapper.base"/>-->
+    <!--<mapper resource="com/example/mapper/LiveRoomMapper.xml"/>-->
+    <!--<mapper resource="com/example/mapper/WayBillMapper.xml"/>-->
   </mappers>
 </configuration>

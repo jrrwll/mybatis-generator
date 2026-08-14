@@ -1,0 +1,23 @@
+apply plugin: 'org.graalvm.buildtools.native'
+
+dependencies {
+    implementation project(":")
+
+    implementation libs.slf4j.api
+    implementation libs.slf4j.simple
+    implementation libs.dreamcat.common
+    implementation libs.bundles.jackson
+    implementation libs.jsqlparser
+}
+
+apply from: new File(rootDir, 'gradle/tasks-jar.gradle')
+
+jar {
+    manifest {
+        attributes(
+                "Main-Class": "org.dreamcat.cli.generator.Main",
+        )
+    }
+}
+
+apply from: new File(rootDir, 'gradle/native-image.gradle')

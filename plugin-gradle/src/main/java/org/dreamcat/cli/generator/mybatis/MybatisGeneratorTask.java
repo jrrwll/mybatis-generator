@@ -1,8 +1,10 @@
 package org.dreamcat.cli.generator.mybatis;
 
-import org.dreamcat.cli.generator.base.InternalUtil;
-import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig.StatementType;
-import org.dreamcat.cli.generator.mybatis.MyBatisGeneratorConfig.TableConfig;
+import org.dreamcat.code.generator.base.InternalUtil;
+import org.dreamcat.code.generator.mybatis.MyBatisGenerator;
+import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig;
+import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig.StatementType;
+import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig.TableConfig;
 import org.dreamcat.cli.generator.mybatis.MybatisGeneratorExtension.Table;
 import org.dreamcat.common.Pair;
 import org.dreamcat.common.io.FileUtil;

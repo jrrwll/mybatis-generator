@@ -1,9 +1,0 @@
-{
-  "overwrite": true,
-  "srcDir": "build/cli/generated/mybatis-generator",
-  "addMapperAnnotation": true,
-  "enableResultMapWithBLOBs": true,
-  "enableExtendsMapper": true,
-  "delimitKeyword": "`",
-  "addComments": true
-}

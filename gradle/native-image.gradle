@@ -28,7 +28,7 @@ graalvmNative {
     }
     binaries {
         main {
-            imageName = "code-generator"
+            imageName = "codeg"
             mainClass = 'org.dreamcat.cli.generator.Main'
             sharedLibrary = false
             buildArgs.addAll([
