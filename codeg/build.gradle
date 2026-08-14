@@ -15,7 +15,7 @@ apply from: new File(rootDir, 'gradle/tasks-jar.gradle')
 jar {
     manifest {
         attributes(
-                "Main-Class": "org.dreamcat.cli.generator.Main",
+                "Main-Class": "org.dreamcat.code.generator.Main",
         )
     }
 }

@@ -13,4 +13,4 @@ target/
 src/test/java/com/example/entity/
 src/test/java/com/example/mapper/
 .env
-src/aot/resources/
+codeg/src/aot/resources/
