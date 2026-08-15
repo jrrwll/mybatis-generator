@@ -39,7 +39,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
     /**
      * {@code id,created_at,updated_at }
      */
-    public String column_list;
+    public String insert_column_list;
     public String base_column_list; // column_list without blob columns
 
     public String insert_generated_key = "";
@@ -106,7 +106,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                 .collect(Collectors.joining("\n"));
 
         this.table_name = config.formatSqlName(tableName);
-        this.base_column_list = this.column_list = table.getAllColumns().values().stream()
+        this.base_column_list = table.getAllColumns().values().stream()
                 .map(c -> config.formatSqlName(c.getColumnName()))
                 .collect(Collectors.joining(", "));
 
@@ -122,6 +122,10 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                         "column", column);
             }
         }
+
+        this.insert_column_list = getAllInsertColumns(table, config)
+                .map(c -> config.formatSqlName(c.getColumnName()))
+                .collect(Collectors.joining(", "));
         this.insert_column_value_list = getAllInsertColumns(table, config)
                 .map(this::formatInsertColumnValue)
                 .collect(Collectors.joining(", "));
@@ -137,7 +141,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                     .collect(Collectors.joining(",\n"));
             this.on_duplicate_key_update = InterpolationUtil.format(_on_duplicate_key_update,
                     "table_name", table_name,
-                    "column_list", column_list,
+                    "insert_column_list", insert_column_list,
                     "insert_column_value_list", insert_column_value_list,
                     "duplicate_key_update_valus", duplicate_key_update_valus);
         }

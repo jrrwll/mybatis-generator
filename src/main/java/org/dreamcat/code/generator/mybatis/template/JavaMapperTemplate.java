@@ -29,8 +29,8 @@ public class JavaMapperTemplate extends MybatisTemplateOutput {
     public String import_package = "";
     public String at_annotation = "";
 
+    public String on_duplicate_key_update;
     // blobs
-    public String select_by_primary_key_with_blobs = "";
     public String select_with_blobs = "";
 
     // extends
@@ -48,6 +48,11 @@ public class JavaMapperTemplate extends MybatisTemplateOutput {
         this.entity_type = config.formatEntityName(tableName);
         this.mapper_type = config.formatMapperName(tableName);
 
+        if(config.getUniqueKeyColumns(tableName) != null) {
+            this.on_duplicate_key_update = InterpolationUtil.format(_on_duplicate_key_update,
+                    "entity_type", entity_type);
+        }
+
         this.primary_key_declare_list = table.getPrimaryKeyColumns().stream().map(c -> {
             String javaName = c.getJavaName();
             if (javaName.startsWith("java.lang") || javaName.startsWith("java.util")) {
@@ -58,10 +63,9 @@ public class JavaMapperTemplate extends MybatisTemplateOutput {
         }).collect(Collectors.joining(", "));
 
         if (config.isEnableResultMapWithBLOBs() && table.hasBlobColumns()) {
-            this.select_by_primary_key_with_blobs = InterpolationUtil.format(_select_by_primary_key_with_blobs,
-                    "entity_type", entity_type, "primary_key_declare_list", primary_key_declare_list);
             this.select_with_blobs = InterpolationUtil.format(_select_with_blobs,
-                    "entity_type", entity_type, "condition_type", condition_type);
+                    "entity_type", entity_type, "condition_type", condition_type,
+                    "primary_key_declare_list", primary_key_declare_list);
         }
 
         if (config.isEnableExtendsMapper()) {
@@ -117,10 +121,11 @@ public class JavaMapperTemplate extends MybatisTemplateOutput {
     }
 
     static final String _primary_key_declare = "@Param(\"$property\") $type $property";
-    static final String _select_by_primary_key_with_blobs =
-            "\n    $entity_type selectByPrimaryKeyWithBLOBs($primary_key_declare_list);\n";
     static final String _select_with_blobs =
-            "\n    List<$entity_type> selectWithBLOBs(@Param(\"condition\") $condition_type condition);\n";
+            "\n    $entity_type selectByPrimaryKeyWithBLOBs($primary_key_declare_list);\n"
+                    + "\n    List<$entity_type> selectWithBLOBs(@Param(\"condition\") $condition_type condition);\n";
+    static final String _on_duplicate_key_update = "\n    int insertOnDuplicateKeyUpdate($entity_type entity);\n"
+            + "\n    void batchInsertOnDuplicateKeyUpdate(List<$entity_type> entity);\n";
 
     static final String _all;
     static final String _all_sub;

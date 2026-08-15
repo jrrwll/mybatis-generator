@@ -43,7 +43,7 @@ $blob_column_list
 
   <insert id="insert" parameterType="$result_map"$insert_generated_key>
     insert into $table_name
-    ($column_list)
+    ($insert_column_list)
     values ($insert_column_value_list)
   </insert>
 
@@ -60,7 +60,7 @@ $if_test_column_value_list
   <insert id="batchInsert" parameterType="$result_map">
     insert into $table_name
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      $column_list
+      $insert_column_list
     </trim>
     values
     <foreach collection="list" index="index" item="item" separator=",">

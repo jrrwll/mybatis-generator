@@ -18,13 +18,13 @@ public interface $mapper_type {
     int insertSelective($entity_type entity);
 
     int batchInsert(List<$entity_type> entity);
-
+$on_duplicate_key_update
     int deleteByPrimaryKey($primary_key_declare_list);
 
     int delete(@Param("condition") $condition_type condition);
 
     $entity_type selectByPrimaryKey($primary_key_declare_list);
-$select_by_primary_key_with_blobs
+
     List<$entity_type> select(@Param("condition") $condition_type condition);
 $select_with_blobs
     long count(@Param("condition") $condition_type condition);

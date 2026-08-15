@@ -35,6 +35,7 @@ class MyBatisGeneratorTest {
         config.setEnableExtendsMapper(true);
 
         TableConfig tableConfig = new TableConfig();
+        tableConfig.setNoInsertColumns(Collections.singletonList("id"));
         tableConfig.setUniqueKeyColumns(Collections.singletonList("name"));
         config.setTableConfigs(Collections.singletonMap("shop", tableConfig));
     }
