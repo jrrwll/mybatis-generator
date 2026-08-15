@@ -3,14 +3,17 @@ package org.dreamcat.code.generator.mybatis.template;
 import org.dreamcat.code.generator.base.ColumnDef;
 import org.dreamcat.code.generator.base.TableDef;
 import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig;
+import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig.TableConfig;
 import org.dreamcat.code.generator.mybatis.MybatisTemplateOutput;
 import org.dreamcat.common.text.InterpolationUtil;
 import org.dreamcat.common.util.MapUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Jerry Will
@@ -45,6 +48,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
      */
     public String insert_column_value_list;
     public String batch_insert_column_value_list;
+    public String on_duplicate_key_update;
     /**
      * {@code <if test="$property != null"> $column, </if> }
      */
@@ -71,7 +75,6 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
     // blob
     public String result_map_with_blobs = "";
     public String blob_column_list = "";
-    public String select_by_primary_key_with_blobs = "";
     public String select_with_blobs = "";
 
     // extends
@@ -103,7 +106,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                 .collect(Collectors.joining("\n"));
 
         this.table_name = config.formatSqlName(tableName);
-        this.base_column_list = this.column_list = table.getNotIgnoredColumns().values().stream()
+        this.base_column_list = this.column_list = table.getAllColumns().values().stream()
                 .map(c -> config.formatSqlName(c.getColumnName()))
                 .collect(Collectors.joining(", "));
 
@@ -119,12 +122,25 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                         "column", column);
             }
         }
-        this.insert_column_value_list = table.getNotIgnoredColumns().values().stream()
+        this.insert_column_value_list = getAllInsertColumns(table, config)
                 .map(this::formatInsertColumnValue)
                 .collect(Collectors.joining(", "));
-        this.batch_insert_column_value_list = table.getNotIgnoredColumns().values().stream()
+        this.batch_insert_column_value_list = getAllInsertColumns(table, config)
                 .map(this::formatBatchInsertColumnValue)
                 .collect(Collectors.joining(", "));
+        List<String> uniqueKeyColumns = config.getUniqueKeyColumns(tableName);
+        if (uniqueKeyColumns != null) {
+            String duplicate_key_update_valus = getAllInsertColumns(table, config)
+                    .filter(column -> !uniqueKeyColumns.contains(column.getColumnName()))
+                    .map(column -> InterpolationUtil.format(
+                            _duplicate_key_update, "column", column.getColumnName()))
+                    .collect(Collectors.joining(",\n"));
+            this.on_duplicate_key_update = InterpolationUtil.format(_on_duplicate_key_update,
+                    "table_name", table_name,
+                    "column_list", column_list,
+                    "insert_column_value_list", insert_column_value_list,
+                    "duplicate_key_update_valus", duplicate_key_update_valus);
+        }
 
         this.if_test_column_list = table.getColumns().values().stream()
                 .map(this::formatIfTestColumn)
@@ -173,10 +189,8 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                             .map(c -> config.formatSqlName(c.getColumnName()))
                             .collect(Collectors.joining(", ")));
 
-            this.select_by_primary_key_with_blobs = InterpolationUtil.format(_select_by_primary_key_with_blobs,
-                    "primary_key_eq_list", primary_key_eq_list, "table_name", table_name);
             this.select_with_blobs = InterpolationUtil.format(
-                    _select_with_blobs, "table_name", table_name);
+                    _select_with_blobs, "primary_key_eq_list", primary_key_eq_list, "table_name", table_name);
         }
 
         if (config.isEnableExtendsMapper()) {
@@ -275,11 +289,18 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                 "type", column.getType()));
     }
 
+    private static Stream<ColumnDef> getAllInsertColumns(TableDef table, MyBatisGeneratorConfig config) {
+        String tableName = table.getTableName();
+        return table.getAllColumns().values().stream()
+                .filter(column -> !config.isNoInsertColumn(column.getColumnName(), tableName));
+    }
+
     static final String _result_map_column = "    <$element column=\"$column\" jdbcType=\"$type\" "
             + "property=\"$property\"/>";
     static final String _insert_column_value = "#{$property,jdbcType=$type}";
     static final String _batch_insert_column_value = "#{item.$property,jdbcType=$type}";
     static final String _insert_generated_key = "\n    useGeneratedKeys=\"true\" keyProperty=\"$property\" keyColumn=\"$column\"";
+    static final String _duplicate_key_update = "      $column = values($column)";
 
     static final String _if_test_column = "      <if test=\"$property != null\">\n"
             + "        $column,\n"
@@ -315,12 +336,14 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
 
     static final String _all;
     static final String _all_sub;
+    static final String _on_duplicate_key_update;
     static final String _select_by_primary_key_with_blobs;
     static final String _select_with_blobs;
 
     static {
         _all = getResourceAsString("mapper.xml");
         _all_sub = getResourceAsString("extends_mapper.xml");
+        _on_duplicate_key_update = getResourceAsString("onDuplicateKeyUpdate.txt");
         _select_by_primary_key_with_blobs = getResourceAsString("selectByPrimaryKeyWithBLOBs.txt");
         _select_with_blobs = getResourceAsString("selectWithBLOBs.txt");
     }

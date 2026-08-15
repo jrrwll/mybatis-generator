@@ -2,8 +2,10 @@ package org.dreamcat.code.generator.mybatis;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
+import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig.TableConfig;
 import org.dreamcat.common.json.DataMapper;
 import org.dreamcat.common.sql.SqlUtil;
 import org.dreamcat.common.sql.TableCommonDef;
@@ -31,6 +33,10 @@ class MyBatisGeneratorTest {
         config.setAddMapperAnnotation(true);
         config.setEnableResultMapWithBLOBs(true);
         config.setEnableExtendsMapper(true);
+
+        TableConfig tableConfig = new TableConfig();
+        tableConfig.setUniqueKeyColumns(Collections.singletonList("name"));
+        config.setTableConfigs(Collections.singletonMap("shop", tableConfig));
     }
 
     @Test

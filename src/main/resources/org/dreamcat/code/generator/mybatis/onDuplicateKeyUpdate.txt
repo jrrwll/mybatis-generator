@@ -1,0 +1,20 @@
+
+  <insert id="insertOnDuplicateKeyUpdate">
+    insert into $table_name
+    ($column_list)
+    values
+    ($insert_column_value_list)
+    on duplicate key update
+$duplicate_key_update_valus
+  </insert>
+
+  <insert id="batchInsertOnDuplicateKeyUpdate">
+    insert into $table_name
+    ($column_list)
+    values
+    <foreach collection="list" item="item" separator=",">
+      ($insert_column_value_list)
+    </foreach>
+    on duplicate key update
+$duplicate_key_update_valus
+  </insert>

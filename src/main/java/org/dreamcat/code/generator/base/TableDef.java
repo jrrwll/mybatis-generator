@@ -27,7 +27,7 @@ public class TableDef {
     private List<ColumnDef> baseColumns;
     private List<ColumnDef> blobColumns;
 
-    private Map<String, ColumnDef> notIgnoredColumns = new LinkedHashMap<>();
+    private Map<String, ColumnDef> allColumns = new LinkedHashMap<>();
 
     public TableDef(TableCommonDef table, SqlBasedGeneratorConfig config) {
         this.tableName = table.getName();
@@ -49,7 +49,7 @@ public class TableDef {
         columns.forEach((name, column) -> {
             if (config.getIgnoreColumns().contains(name)) return;
             // all columns
-            notIgnoredColumns.put(name, column);
+            allColumns.put(name, column);
 
             // not primary key columns
             if (!pkColumns.contains(name)) {

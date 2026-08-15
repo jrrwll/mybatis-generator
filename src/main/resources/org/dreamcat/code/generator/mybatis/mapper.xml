@@ -71,7 +71,7 @@ $if_test_column_value_list
       )
     </foreach>
   </insert>
-
+$on_duplicate_key_update
   <delete id="deleteByPrimaryKey">
     delete from $table_name
     where $primary_key_eq_list
@@ -98,7 +98,7 @@ $if_test_column_value_list
     from $table_name
     where $primary_key_eq_list
   </select>
-$select_by_primary_key_with_blobs
+
   <select id="select" resultMap="BaseResultMap">
     select
     <include refid="base_column_list"/>

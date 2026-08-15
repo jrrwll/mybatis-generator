@@ -88,7 +88,7 @@ public class JavaEntityTemplate extends MybatisTemplateOutput {
             at_annotation = "\n@Getter\n@Setter\n@ToString";
         } else {
             List<String> getSetList = new ArrayList<>();
-            for (ColumnDef c : table.getNotIgnoredColumns().values()) {
+            for (ColumnDef c : table.getAllColumns().values()) {
                 String property = config.formatPropertyName(c.getColumnName(), tableName);
 
                 getSetList.add(InterpolationUtil.format(_property_get_set, MapUtil.of(

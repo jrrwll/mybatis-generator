@@ -37,7 +37,7 @@ public class ModelTemplate extends FastapiCurdTemplateOutput {
         List<String> create_field_declare_list = new ArrayList<>();
         List<String> update_field_declare_list = new ArrayList<>();
 
-        for (ColumnDef c : table.getNotIgnoredColumns().values()) {
+        for (ColumnDef c : table.getAllColumns().values()) {
             boolean primaryKey = table.getPrimaryKeyColumns().contains(c);
 
             String _field_declare_tmp = _field_declare;

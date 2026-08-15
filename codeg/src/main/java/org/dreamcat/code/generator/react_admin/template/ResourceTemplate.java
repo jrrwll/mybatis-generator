@@ -53,7 +53,7 @@ public class ResourceTemplate extends ReactAdminTemplateOutput {
         // filter
         List<String> filter_list = new ArrayList<>();
         Map<String, FilterConfig> filterFields = tableConfig.getFilterFields();
-        for (ColumnDef c : table.getNotIgnoredColumns().values()) {
+        for (ColumnDef c : table.getAllColumns().values()) {
             String field_name = config.formatFieldName(c.getColumnName(), tableName);
             String field_label = labelGetter.apply(c);
 
@@ -115,7 +115,7 @@ public class ResourceTemplate extends ReactAdminTemplateOutput {
 
         // list
         List<String> list_fields = new ArrayList<>();
-        for (ColumnDef c : table.getNotIgnoredColumns().values()) {
+        for (ColumnDef c : table.getAllColumns().values()) {
             if (ObjectUtil.isEmpty(config.getNotGetFields(tableName))
                     || config.getNotGetFields(tableName).contains(c.getColumnName())) continue;
 
@@ -138,7 +138,7 @@ public class ResourceTemplate extends ReactAdminTemplateOutput {
         // create and edit
         List<String> create_fields = new ArrayList<>();
         List<String> edit_fields = new ArrayList<>();
-        for (ColumnDef c : table.getNotIgnoredColumns().values()) {
+        for (ColumnDef c : table.getAllColumns().values()) {
             boolean isPrimaryKey = table.getPrimaryKeyColumns().contains(c);
 
             String field_name = config.formatFieldName(c.getColumnName(), tableName);

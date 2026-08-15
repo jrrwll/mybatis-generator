@@ -63,6 +63,8 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
 
     // statements which need be pruned
     private List<StatementType> prunedStatements = new ArrayList<>();
+    // only works on all `insert` methods without `selective`
+    private List<String> noInsertColumns;
 
     public String getMapperPackageName() {
         if (mapperPackageName != null) return mapperPackageName;
@@ -123,6 +125,20 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
                 StringUtil::toCamelCase);
     }
 
+    public boolean isNoInsertColumn(String columnName, String tableName) {
+        TableConfig tableConfig = tableConfigs.get(tableName);
+        if (tableConfig == null || ObjectUtil.isEmpty(tableConfig.getNoInsertColumns())) return false;
+        return tableConfig.getNoInsertColumns().contains(columnName);
+    }
+
+    public List<String> getUniqueKeyColumns(String tableName) {
+        TableConfig tableConfig = tableConfigs.get(tableName);
+        if (tableConfig == null) return null;
+        List<String> uniqueKeyColumns = tableConfig.getUniqueKeyColumns();
+        if (ObjectUtil.isEmpty(uniqueKeyColumns)) return null;
+        return uniqueKeyColumns;
+    }
+
     public boolean isTableGeneratedKeys(String tableName) {
         TableConfig tableConfig = tableConfigs.get(tableName);
         return tableConfig != null && tableConfig.isGeneratedKeys();
@@ -136,7 +152,10 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
         private String mapperName;
         private String extendsMapperName;
         private String conditionName;
+
         private boolean generatedKeys;
+        private List<String> uniqueKeyColumns;
+        private List<String> noInsertColumns;
 
         private Map<String, String> propertyNames = new HashMap<>();
     }
