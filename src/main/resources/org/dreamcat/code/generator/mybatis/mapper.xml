@@ -118,6 +118,12 @@ $on_duplicate_key_update
       limit #{condition.limit} offset #{condition.offset}
     </if>
   </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    <include refid="base_column_list"/>
+    from $table_name
+  </select>
 $select_with_blobs
   <select id="count" resultType="java.lang.Long">
     select count(*) from $table_name
@@ -129,6 +135,10 @@ $select_with_blobs
         where 1 = 0
       </otherwise>
     </choose>
+  </select>
+
+  <select id="countAll" resultType="java.lang.Long">
+    select count(*) from $table_name
   </select>
 
   <update id="updateByPrimaryKey" parameterType="$result_map">

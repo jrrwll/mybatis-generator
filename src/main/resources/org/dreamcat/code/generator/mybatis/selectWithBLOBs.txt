@@ -22,3 +22,9 @@
       limit #{condition.limit} offset #{condition.offset}
     </if>
   </select>
+
+  <select id="selectAllWithBLOBs" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="base_column_list"/>
+    from $table_name
+  </select>

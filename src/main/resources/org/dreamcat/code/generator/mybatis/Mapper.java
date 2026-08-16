@@ -27,7 +27,11 @@ $on_duplicate_key_update
 
     List<$entity_type> select(@Param("condition") $condition_type condition);
 $select_with_blobs
+    List<$entity_type> selectAll();
+
     long count(@Param("condition") $condition_type condition);
+
+    long countAll();
 
     int updateByPrimaryKey($entity_type entity);
 
