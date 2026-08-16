@@ -12,7 +12,7 @@ class MainTest {
     void test() {
         Main.main(new String[]{"-h"});
         Main.main(new String[]{"mb", "-c", "./src/test/resources/mb.json",
-                "-s", "./src/test/resources/ddl.sql"});
+                "-s", "../src/test/resources/ddl.sql"});
         Main.main(new String[]{"ra", "-c", "./src/test/resources/ra.json",
                 "-s", "./src/test/resources/ddl_classic.sql"});
         Main.main(new String[]{"fc", "-c", "./src/test/resources/fc.json",
