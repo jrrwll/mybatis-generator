@@ -48,7 +48,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
      */
     public String insert_column_value_list;
     public String batch_insert_column_value_list;
-    public String on_duplicate_key_update;
+    public String duplicate_key_update_valus;
     /**
      * {@code <if test="$property != null"> $column, </if> }
      */
@@ -134,16 +134,11 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                 .collect(Collectors.joining(", "));
         List<String> uniqueKeyColumns = config.getUniqueKeyColumns(tableName);
         if (uniqueKeyColumns != null) {
-            String duplicate_key_update_valus = getAllInsertColumns(table, config)
+            this.duplicate_key_update_valus = getAllInsertColumns(table, config)
                     .filter(column -> !uniqueKeyColumns.contains(column.getColumnName()))
                     .map(column -> InterpolationUtil.format(
                             _duplicate_key_update, "column", column.getColumnName()))
                     .collect(Collectors.joining(",\n"));
-            this.on_duplicate_key_update = InterpolationUtil.format(_on_duplicate_key_update,
-                    "table_name", table_name,
-                    "insert_column_list", insert_column_list,
-                    "insert_column_value_list", insert_column_value_list,
-                    "duplicate_key_update_valus", duplicate_key_update_valus);
         }
 
         this.if_test_column_list = table.getColumns().values().stream()
@@ -192,9 +187,6 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                     table.getBlobColumns().stream()
                             .map(c -> config.formatSqlName(c.getColumnName()))
                             .collect(Collectors.joining(", ")));
-
-            this.select_with_blobs = InterpolationUtil.format(
-                    _select_with_blobs, "primary_key_eq_list", primary_key_eq_list, "table_name", table_name);
         }
 
         if (config.isEnableExtendsMapper()) {
@@ -340,15 +332,9 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
 
     static final String _all;
     static final String _all_sub;
-    static final String _on_duplicate_key_update;
-    static final String _select_by_primary_key_with_blobs;
-    static final String _select_with_blobs;
 
     static {
         _all = getResourceAsString("mapper.xml");
         _all_sub = getResourceAsString("extends_mapper.xml");
-        _on_duplicate_key_update = getResourceAsString("onDuplicateKeyUpdate.txt");
-        _select_by_primary_key_with_blobs = getResourceAsString("selectByPrimaryKeyWithBLOBs.txt");
-        _select_with_blobs = getResourceAsString("selectWithBLOBs.txt");
     }
 }

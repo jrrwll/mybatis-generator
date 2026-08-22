@@ -18,16 +18,28 @@ public interface $mapper_type {
     int insertSelective($entity_type entity);
 
     int batchInsert(List<$entity_type> entity);
-$on_duplicate_key_update
+
+    int insertOnDuplicateKeyUpdate($entity_type entity);
+
+    void batchInsertOnDuplicateKeyUpdate(List<$entity_type> entity);
+
     int deleteByPrimaryKey($primary_key_declare_list);
 
     int delete(@Param("condition") $condition_type condition);
 
     $entity_type selectByPrimaryKey($primary_key_declare_list);
 
+    $entity_type selectByPrimaryKeyWithBLOBs($primary_key_declare_list);
+
     List<$entity_type> select(@Param("condition") $condition_type condition);
-$select_with_blobs
+
+    List<$entity_type> selectWithBLOBs(@Param("condition") $condition_type condition);
+
+    List<Map<String, Object>> selectColumns(@Param("columns") List<$condition_type.Column> columns, @Param("condition") $condition_type condition);
+
     List<$entity_type> selectAll();
+
+    List<$entity_type> selectAllWithBLOBs();
 
     long count(@Param("condition") $condition_type condition);
 
@@ -35,9 +47,13 @@ $select_with_blobs
 
     int updateByPrimaryKey($entity_type entity);
 
+    int updateByPrimaryKeyWithBLOBs($entity_type entity);
+
     int updateByPrimaryKeySelective($entity_type entity);
 
     int update(@Param("entity") $entity_type entity, @Param("condition") $condition_type condition);
+
+    int updateWithBLOBs(@Param("entity") $entity_type entity, @Param("condition") $condition_type condition);
 
     int updateSelective(@Param("entity") $entity_type entity, @Param("condition") $condition_type condition);
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dreamcat.code.generator.base.InternalUtil;
 import org.dreamcat.code.generator.base.SqlBasedGenerator;
 import org.dreamcat.code.generator.base.TableDef;
+import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig.StatementType;
 import org.dreamcat.code.generator.mybatis.template.JavaConditionTemplate;
 import org.dreamcat.code.generator.mybatis.template.JavaEntityTemplate;
 import org.dreamcat.code.generator.mybatis.template.JavaMapperTemplate;
@@ -44,6 +45,8 @@ public class MyBatisGenerator implements SqlBasedGenerator {
             removedSqlMethods = config.getPrunedStatements().stream()
                     .map(Enum::name).collect(Collectors.toList());
         }
+        boolean noUk = config.getUniqueKeyColumns(tableName) == null;
+        boolean noBlobs = !config.isEnableResultMapWithBLOBs() || !table.hasBlobColumns();
 
         // java-mapper
         File mapperDir = new File(srcDir, config.getMapperPackageName().replace('.', '/'));
@@ -55,7 +58,14 @@ public class MyBatisGenerator implements SqlBasedGenerator {
             String javaMapperName = config.formatMapperName(tableName) + ".java";
             File javaMapperFile = javaMapperTemplate.writeDefault(mapperDir, javaMapperName, overwrite);
             InternalUtil.pruneJavaIfNeed(javaMapperFile, removedSqlMethods);
-
+            if (noUk) {
+                InternalUtil.pruneJavaIfNeed(javaMapperFile,
+                        StatementType.insertOnDuplicateKeyUpdate,
+                        StatementType.batchInsertOnDuplicateKeyUpdate);
+            }
+            if (noBlobs) {
+                InternalUtil.pruneJavaIfNeed(javaMapperFile, StatementType.allWithBLOBs());
+            }
             // java-extends-mapper
             if (config.isEnableExtendsMapper()) {
                 File extendsMapperDir = new File(srcDir, config.getExtendsMapperPackageName().replace('.', '/'));
@@ -80,6 +90,14 @@ public class MyBatisGenerator implements SqlBasedGenerator {
         }
         File sqlMapperFile = sqlMapperTemplate.writeDefault(sqlMapperDir, sqlMapperName, overwrite);
         InternalUtil.pruneXmlIfNeed(sqlMapperFile, removedSqlMethods);
+        if (noUk) {
+            InternalUtil.pruneXmlIfNeed(sqlMapperFile,
+                    StatementType.insertOnDuplicateKeyUpdate,
+                    StatementType.batchInsertOnDuplicateKeyUpdate);
+        }
+        if (noBlobs) {
+            InternalUtil.pruneXmlIfNeed(sqlMapperFile, StatementType.allWithBLOBs());
+        }
         // sql-extends-mapper
         if (config.isEnableExtendsMapper()) {
             File extendsSqlMapperDir;

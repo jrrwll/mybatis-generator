@@ -6,16 +6,19 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.dreamcat.code.generator.base.SqlBasedGeneratorConfig;
 import org.dreamcat.common.util.ObjectUtil;
 import org.dreamcat.common.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * @author Jerry Will
@@ -160,18 +163,38 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
         private Map<String, String> propertyNames = new HashMap<>();
     }
 
+    @Getter
+    @RequiredArgsConstructor
     public enum StatementType {
         insert,
         insertSelective,
         batchInsert,
+        insertOnDuplicateKeyUpdate,
+        batchInsertOnDuplicateKeyUpdate,
         deleteByPrimaryKey,
         delete,
-        selectByPrimaryKey,
-        select,
+        selectByPrimaryKey(true),
+        select(true),
+        selectColumns,
+        selectAll(true),
         count,
-        updateByPrimaryKey,
+        countAll,
+        updateByPrimaryKey(true),
         updateByPrimaryKeySelective,
-        update,
+        update(true),
         updateSelective,
+        ;
+
+        StatementType() {
+            this(false);
+        }
+
+        private final boolean withBLOBs;
+
+        public static List<String> allWithBLOBs() {
+            return Arrays.stream(values()).filter(StatementType::isWithBLOBs)
+                    .map(Enum::name)
+                    .collect(Collectors.toList());
+        }
     }
 }

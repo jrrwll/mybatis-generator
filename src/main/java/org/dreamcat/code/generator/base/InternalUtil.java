@@ -8,6 +8,7 @@ import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
+import org.dreamcat.code.generator.mybatis.MyBatisGeneratorConfig.StatementType;
 import org.dreamcat.common.io.FileUtil;
 import org.dreamcat.common.sql.ColumnCommonDef;
 import org.dreamcat.common.sql.IndexCommonDef;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -207,6 +209,10 @@ public class InternalUtil {
     static final Pattern stmt_end = Pattern.compile("</(select|delete|update|insert)>");
     static final Pattern sql_method = Pattern.compile("\\w+ (\\w+)\\(");
 
+    public static void pruneXmlIfNeed(File file, StatementType... statementTypes) throws IOException {
+        pruneXmlIfNeed(file, Arrays.stream(statementTypes).map(Enum::name).collect(Collectors.toList()));
+    }
+
     public static void pruneXmlIfNeed(File file, List<String> removedSqlMethods) throws IOException {
         if (ObjectUtil.isEmpty(removedSqlMethods)) return;
         List<String> lines = FileUtil.readLines(file);
@@ -235,6 +241,10 @@ public class InternalUtil {
         }
         String content = String.join("\n", outputLines);
         FileUtil.write(file, content);
+    }
+
+    public static void pruneJavaIfNeed(File file, StatementType... statementTypes) throws IOException {
+        pruneJavaIfNeed(file, Arrays.stream(statementTypes).map(Enum::name).collect(Collectors.toList()));
     }
 
     public static void pruneJavaIfNeed(File file, List<String> removedSqlMethods) throws IOException {

@@ -19,20 +19,20 @@ public class $condition_type {
         criteriaList = new ArrayList<>();
     }
 
-    public $condition_type orderByDesc(Order order) {
-        return appendOrderBy(order, true);
+    public $condition_type orderByDesc(Column column) {
+        return appendOrderBy(column, true);
     }
 
-    public $condition_type orderByAsc(Order order) {
-        return appendOrderBy(order, false);
+    public $condition_type orderByAsc(Column column) {
+        return appendOrderBy(column, false);
     }
 
-    public $condition_type appendOrderBy(Order order, boolean desc) {
+    public $condition_type appendOrderBy(Column column, boolean desc) {
         String sortType = desc ? "desc" : "asc";
         if (null != orderBy) {
-            orderBy = orderBy + ", " + order.getColumnName() + " " + sortType;
+            orderBy = orderBy + ", " + column.getColumnName() + " " + sortType;
         } else {
-            orderBy = order.getColumnName() + " " + sortType;
+            orderBy = column.getColumnName() + " " + sortType;
         }
         return this;
     }
@@ -202,13 +202,13 @@ $criteria_method_list
         }
     }
 
-    public enum Order {
+    public enum Column {
 $column_enum_list
         ;
 
         private final String columnName;
 
-        Order(String columnName) {
+        Column(String columnName) {
             this.columnName = columnName;
         }
 
