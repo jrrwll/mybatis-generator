@@ -193,7 +193,7 @@ public class MyBatisGeneratorConfig extends SqlBasedGeneratorConfig {
 
         public static List<String> allWithBLOBs() {
             return Arrays.stream(values()).filter(StatementType::isWithBLOBs)
-                    .map(Enum::name)
+                    .map(it -> it.name() + "WithBLOBs")
                     .collect(Collectors.toList());
         }
     }

@@ -207,14 +207,16 @@ public class InternalUtil {
     // prune file
     static final Pattern stmt_id = Pattern.compile("<(select|delete|update|insert) id=\"(\\w+?)\" .*>");
     static final Pattern stmt_end = Pattern.compile("</(select|delete|update|insert)>");
-    static final Pattern sql_method = Pattern.compile("\\w+ (\\w+)\\(");
+    static final Pattern sql_method = Pattern.compile("\\w+>? (\\w+)\\(");
 
     public static void pruneXmlIfNeed(File file, StatementType... statementTypes) throws IOException {
         pruneXmlIfNeed(file, Arrays.stream(statementTypes).map(Enum::name).collect(Collectors.toList()));
     }
 
     public static void pruneXmlIfNeed(File file, List<String> removedSqlMethods) throws IOException {
+        if (file == null) return;
         if (ObjectUtil.isEmpty(removedSqlMethods)) return;
+
         List<String> lines = FileUtil.readLines(file);
         List<String> outputLines = new ArrayList<>();
         for (int i = 0, n = lines.size(); i < n; i++) {
@@ -248,7 +250,9 @@ public class InternalUtil {
     }
 
     public static void pruneJavaIfNeed(File file, List<String> removedSqlMethods) throws IOException {
+        if (file == null) return;
         if (ObjectUtil.isEmpty(removedSqlMethods)) return;
+
         List<String> lines = FileUtil.readLines(file);
         List<String> outputLines = new ArrayList<>();
         for (int i = 0, n = lines.size(); i < n; i++) {

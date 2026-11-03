@@ -53,6 +53,13 @@ class MyBatisGeneratorTest {
     }
 
     @Test
+    void testNoWithBLOBs() throws IOException {
+        config.setEnableResultMapWithBLOBs(false);
+        config.setEnableExtendsMapper(false);
+        test();
+    }
+
+    @Test
     void testGenerate() throws IOException {
         config.setEnableLombok(false);
         config.setAddComments(false);

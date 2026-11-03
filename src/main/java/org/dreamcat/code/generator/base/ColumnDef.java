@@ -4,6 +4,7 @@ import lombok.Data;
 import org.dreamcat.common.sql.ColumnCommonDef;
 import org.dreamcat.common.util.ObjectUtil;
 
+import javax.naming.OperationNotSupportedException;
 import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.util.Date;
@@ -61,6 +62,7 @@ public class ColumnDef {
             case "varchar":
             case "char":
             case "string":
+            case "json":
                 this.type = JDBCType.VARCHAR;
                 this.javaType = String.class;
                 break;
