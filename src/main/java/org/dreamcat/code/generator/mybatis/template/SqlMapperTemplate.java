@@ -48,7 +48,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
      */
     public String insert_column_value_list;
     public String batch_insert_column_value_list;
-    public String duplicate_key_update_valus;
+    public String duplicate_key_update_values = "";
     /**
      * {@code <if test="$property != null"> $column, </if> }
      */
@@ -75,7 +75,6 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
     // blob
     public String result_map_with_blobs = "";
     public String blob_column_list = "";
-    public String select_with_blobs = "";
 
     // extends
     public String extends_mapper_package;
@@ -134,7 +133,7 @@ public class SqlMapperTemplate extends MybatisTemplateOutput {
                 .collect(Collectors.joining(", "));
         List<String> uniqueKeyColumns = config.getUniqueKeyColumns(tableName);
         if (uniqueKeyColumns != null) {
-            this.duplicate_key_update_valus = getAllInsertColumns(table, config)
+            this.duplicate_key_update_values = getAllInsertColumns(table, config)
                     .filter(column -> !uniqueKeyColumns.contains(column.getColumnName()))
                     .map(column -> InterpolationUtil.format(
                             _duplicate_key_update, "column", column.getColumnName()))

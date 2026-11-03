@@ -78,7 +78,7 @@ $if_test_column_value_list
     values
       ($insert_column_value_list)
     on duplicate key update
-$duplicate_key_update_valus
+$duplicate_key_update_values
   </insert>
 
   <insert id="batchInsertOnDuplicateKeyUpdate">
@@ -89,7 +89,7 @@ $duplicate_key_update_valus
       ($insert_column_value_list)
     </foreach>
     on duplicate key update
-$duplicate_key_update_valus
+$duplicate_key_update_values
   </insert>
 
   <delete id="deleteByPrimaryKey">

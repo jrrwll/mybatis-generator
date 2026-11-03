@@ -29,10 +29,6 @@ public class JavaMapperTemplate extends MybatisTemplateOutput {
     public String import_package = "";
     public String at_annotation = "";
 
-    public String on_duplicate_key_update;
-    // blobs
-    public String select_with_blobs = "";
-
     // extends
     public String extends_mapper_package;
     public String extends_mapper_type;

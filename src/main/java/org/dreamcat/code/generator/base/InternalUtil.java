@@ -205,7 +205,7 @@ public class InternalUtil {
     }
 
     // prune file
-    static final Pattern stmt_id = Pattern.compile("<(select|delete|update|insert) id=\"(\\w+?)\" .*>");
+    static final Pattern stmt_id = Pattern.compile("<(select|delete|update|insert) id=\"(\\w+?)\".*>");
     static final Pattern stmt_end = Pattern.compile("</(select|delete|update|insert)>");
     static final Pattern sql_method = Pattern.compile("\\w+>? (\\w+)\\(");
 
@@ -237,6 +237,12 @@ public class InternalUtil {
                 String endLine = lines.get(i);
                 Matcher stmtEndMatcher = stmt_end.matcher(endLine);
                 if (stmtEndMatcher.find()) {
+                    if (i < n - 1) {
+                        // skip one blank line
+                        if (ObjectUtil.isBlank(lines.get(i + 1))) {
+                            i++;
+                        }
+                    }
                     break;
                 }
             }
